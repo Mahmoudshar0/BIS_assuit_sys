@@ -17,14 +17,14 @@ export interface AuthData {
 export interface SuccessResponse {
   successed: true;
   message: string;
-  errors: any[];
+  errors: unknown[];
   data: AuthData;
 }
 
 export interface ErrorResponse {
   successed: false;
   message: string;
-  errors: any[];
+  errors: unknown[];
   data: null;
 }
 

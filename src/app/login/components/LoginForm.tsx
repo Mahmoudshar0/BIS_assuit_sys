@@ -39,8 +39,16 @@ export default function LoginForm() {
         default:
           router.push("/");
       }
-    } catch (err: any) {
-      setError("خطأ: " + (err.message || "فشل في الاتصال، حاول مرة أخرى."));
+    } catch (err: unknown) {
+      let errorMessage = "فشل في الاتصال، حاول مرة أخرى.";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      }
+
+      setError("خطأ: " + errorMessage);
     } finally {
       setLoading(false);
     }
