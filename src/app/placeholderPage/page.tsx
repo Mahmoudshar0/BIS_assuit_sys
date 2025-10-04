@@ -127,14 +127,6 @@ export default function AttendanceDashboard() {
               عرض سجلات الحضور السابقة
             </button>
           </div>
-
-          <div className="mt-8 p-4 bg-yellow-50 border-r-4 border-yellow-400 text-yellow-800 rounded-lg">
-            <p className="font-medium">ملاحظة التوجيه:</p>
-            <p className="text-sm">
-              للتطبيق الحقيقي، يجب عليك استبدال الدالة الوهمية `decodeToken`
-              بالدالة الفعلية من ملف `src/lib/auth.ts`.
-            </p>
-          </div>
         </div>
       </div>
     </div>
