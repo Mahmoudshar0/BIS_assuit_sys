@@ -28,7 +28,7 @@ export default function LoginForm() {
 
       switch (userClaims.role) {
         case "Admin":
-          router.push("/placeholderPage");
+          router.push("/overview");
           break;
         case "Faculty":
           router.push("/attendance");
