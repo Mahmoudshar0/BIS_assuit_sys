@@ -1,6 +1,4 @@
 "use client";
-// في Next.js، يجب أن تكون صفحات المسار محمية بمجموعة مسارات (admin)
-// وتستخدم الـ Layout الرئيسي للمجموعة
 
 export default function OverviewPage() {
   return (
@@ -10,7 +8,6 @@ export default function OverviewPage() {
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* بطاقة إحصائية 1: الطلاب */}
         <div className="bg-white p-6 rounded-xl shadow-lg border-r-4 border-indigo-500">
           <p className="text-sm text-gray-500">إجمالي الطلاب</p>
           <p className="text-4xl font-bold text-indigo-700 mt-1">4,210</p>
@@ -19,7 +16,6 @@ export default function OverviewPage() {
           </p>
         </div>
 
-        {/* بطاقة إحصائية 2: المقررات */}
         <div className="bg-white p-6 rounded-xl shadow-lg border-r-4 border-sky-500">
           <p className="text-sm text-gray-500">المقررات النشطة</p>
           <p className="text-4xl font-bold text-sky-700 mt-1">45</p>
