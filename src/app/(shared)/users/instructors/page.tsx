@@ -116,10 +116,10 @@ interface ValidationErrors {
   apiError?: string;
 }
 
+// **تم تعديل القائمة لتشمل (1: دكتور، 2: معيد) فقط**
 const INSTRUCTOR_TITLES = [
-  { id: 1, title: "أستاذ" },
-  { id: 2, title: "محاضر" },
-  { id: 3, title: "معيد" },
+  { id: 1, title: "دكتور" },
+  { id: 2, title: "معيد" },
 ];
 
 interface ConfirmationModalProps {
@@ -387,7 +387,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start border-b pb-3 mb-4">
-          {/* تم تغيير اللون الأساسي إلى الأزرق */}
           <h3 className="text-xl font-bold text-blue-600">
             {isEditing ? "تعديل بيانات المحاضر" : "عرض بيانات المحاضر"}
           </h3>
@@ -992,7 +991,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 name="instructorTitle"
                 value={formData.instructorTitle}
                 onChange={handleChange}
-                // تم تغيير التركيز (Focus) إلى الأزرق
                 className={`p-2 border bg-white rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
                   errors.instructorTitle ? "border-red-500" : "border-gray-300"
                 }`}
@@ -1209,7 +1207,7 @@ const InstructorsPage: React.FC = () => {
   }, [instructors, searchTerm]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 rounded-3xl" dir="rtl">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 rounded-3xl " dir="rtl">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-3xl font-extrabold text-gray-900 mb-4 sm:mb-0">
           إدارة المحاضرين
@@ -1217,7 +1215,6 @@ const InstructorsPage: React.FC = () => {
         <div className="flex space-x-3 space-x-reverse w-full sm:w-auto">
           <button
             onClick={() => setAddModal(true)}
-            // تم تغيير لون زر الإضافة الرئيسي إلى الأزرق
             className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition shadow-lg w-full sm:w-auto"
           >
             <Plus size={20} className="ml-2" />
@@ -1233,19 +1230,17 @@ const InstructorsPage: React.FC = () => {
             placeholder="ابحث بالاسم، البريد الإلكتروني، أو الرقم الوطني..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            // تم تغيير التركيز (Focus) إلى الأزرق
             className="w-full py-2 pr-10 pl-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition text-right"
           />
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         </div>
         <p className="text-gray-600 font-semibold">
-          إجمالي المحاضرين: {/* تم تغيير لون الرقم الإجمالي إلى الأزرق */}
+          إجمالي المحاضرين:
           <span className="text-blue-600 text-xl">{instructors.length}</span>
         </p>
       </div>
 
       {isLoading && deleteId === null && (
-        // تم تغيير لون أيقونة التحميل إلى الأزرق
         <div className="flex justify-center items-center py-10 text-blue-600">
           <Loader2 className="w-8 h-8 animate-spin ml-2" />
           <p className="text-lg">جاري تحميل البيانات...</p>
