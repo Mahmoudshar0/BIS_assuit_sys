@@ -102,11 +102,11 @@ export default function LoginForm() {
         type="submit"
         disabled={loading}
         className={`w-full py-3 px-4 rounded-lg font-bold text-white text-lg shadow-lg transition-all duration-300 
-          ${
-            loading
-              ? "bg-indigo-400 cursor-not-allowed"
-              : "bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          }`}
+         ${
+           loading
+             ? "bg-green-400 cursor-not-allowed"
+             : "bg-green-600 hover:bg-green-700 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+         }`}
       >
         {loading ? (
           <span className="animate-pulse">جارٍ تسجيل الدخول...</span>

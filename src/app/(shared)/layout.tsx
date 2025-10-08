@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -71,13 +72,10 @@ export default function SharedDashboardLayout({
   };
 
   return (
-    <div
-      className="flex min-h-screen bg-gradient-to-tr from-slate-100 to-sky-50 relative"
-      dir="rtl"
-    >
+    <div className="flex min-h-screen relative" dir="rtl">
       {isMobile && (
         <button
-          className="fixed top-4 right-4 z-30 bg-sky-600 text-white p-3 rounded-lg shadow-lg"
+          className="fixed top-4 right-4 z-30 bg-gradient-to-r from-green-600 to-blue-600 text-white p-3 rounded-lg shadow-lg"
           onClick={() => setIsSidebarOpen(true)}
         >
           <Menu size={22} />
@@ -100,14 +98,20 @@ export default function SharedDashboardLayout({
         }`}
       >
         <div>
-          <div className="p-6 border-b border-slate-200 flex justify-between items-center">
-            <h1 className="text-2xl font-bold mb-1 text-sky-700">
-              لوحة التحكم
-            </h1>
+          <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-green-500 to-blue-500 text-white flex justify-between items-center rounded-tl-2xl">
+            <div className="flex items-center gap-3">
+              <img
+                src="/faculty-logo.png"
+                alt="Logo"
+                className="w-10 h-10 rounded-full shadow-md border border-white/50"
+              />
+              <h1 className="text-2xl font-bold tracking-wide">لوحة التحكم</h1>
+            </div>
+
             {isMobile && (
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="text-slate-600 hover:text-red-500 transition"
+                className="text-white/80 hover:text-white transition"
               >
                 <X size={22} />
               </button>
@@ -121,9 +125,9 @@ export default function SharedDashboardLayout({
                   <div key={tab.href} className="flex flex-col">
                     <button
                       onClick={() => setIsUsersOpen(!isUsersOpen)}
-                      className={`flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-right font-medium transition-all duration-300 hover:bg-sky-100 hover:text-sky-700 w-full ${
+                      className={`flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-right font-medium transition-all duration-300 hover:bg-green-50 hover:text-blue-700 w-full ${
                         isUsersOpen
-                          ? "bg-sky-50 text-sky-600"
+                          ? "bg-green-100 text-blue-700"
                           : "text-slate-800"
                       }`}
                     >
@@ -150,11 +154,11 @@ export default function SharedDashboardLayout({
                           <Link
                             key={child.href}
                             href={child.href}
-                            onClick={() => isMobile && setIsSidebarOpen(false)} // يغلق السايدبار بعد التنقل
+                            onClick={() => isMobile && setIsSidebarOpen(false)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
                               isActive(child.href)
-                                ? "bg-sky-200 text-sky-800 font-semibold"
-                                : "text-slate-600 hover:bg-sky-50 hover:text-sky-700"
+                                ? "bg-green-200 text-blue-900 font-semibold"
+                                : "text-slate-600 hover:bg-green-50 hover:text-blue-700"
                             }`}
                           >
                             {child.label}
@@ -167,11 +171,11 @@ export default function SharedDashboardLayout({
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    onClick={() => isMobile && setIsSidebarOpen(false)} // يغلق بعد التنقل
+                    onClick={() => isMobile && setIsSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg text-right font-medium transition-all duration-300 ${
                       isActive(tab.href)
-                        ? "bg-sky-50 text-sky-600"
-                        : "hover:bg-sky-100 hover:text-sky-700 text-slate-800"
+                        ? "bg-green-100 text-blue-700"
+                        : "hover:bg-green-50 hover:text-blue-700 text-slate-800"
                     }`}
                   >
                     <tab.icon size={20} />
@@ -193,9 +197,15 @@ export default function SharedDashboardLayout({
       </motion.aside>
 
       <main
-        className={`flex-1 p-10 bg-white rounded-s-3xl shadow-inner m-4 transition-all duration-300 ${
+        className={`flex-1 p-8 rounded-s-3xl shadow-inner m-2 transition-all duration-300 ${
           isMobile ? "mr-0" : "mr-72"
-        }`}
+        } bg-white/70 backdrop-blur-sm`}
+        style={{
+          backgroundImage: `url('/cover2.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
       >
         {children}
       </main>

@@ -15,18 +15,10 @@ import {
   EyeOff,
 } from "lucide-react";
 
-// The environment variables are assumed to be available
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 const BASE_API_PATH = "/Instructor";
 
-// --- Utility Functions ---
-
-/**
- * دالة للتحقق من الرقم القومي المصري (14 رقم) وصحة تاريخ الميلاد.
- * @param nationalId - الرقم القومي (string).
- * @returns رسالة خطأ إذا كان غير صالح، أو null إذا كان صالحًا.
- */
 const validateNationalId = (nationalId: string): string | null => {
   if (!/^\d{14}$/.test(nationalId)) {
     return "يجب أن يتكون الرقم القومي من 14 رقمًا بالضبط.";
@@ -68,7 +60,6 @@ const validateNationalId = (nationalId: string): string | null => {
   return null;
 };
 
-// --- Interfaces (DTOs) ---
 interface InstructorUserDto {
   id: number;
   name: string;
@@ -86,7 +77,6 @@ interface InstructorDto {
   instructorTitle: string;
 }
 
-// Interface for update payload
 interface UpdateUserDto extends Partial<InstructorUserDto> {
   id: number;
   password?: string;
@@ -126,19 +116,12 @@ interface ValidationErrors {
   apiError?: string;
 }
 
-// Mock Title Mapping for demonstration (replace with actual API data if available)
 const INSTRUCTOR_TITLES = [
   { id: 1, title: "أستاذ" },
   { id: 2, title: "محاضر" },
   { id: 3, title: "معيد" },
 ];
 
-// --- Utility Components ---
-
-// ... (ConfirmationModal, Toast components remain the same as before) ...
-/**
- * Custom Confirmation Modal (Replaces alert/confirm)
- */
 interface ConfirmationModalProps {
   title: string;
   message: string;
@@ -196,9 +179,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   </div>
 );
 
-/**
- * Custom Toast Notification (Replaces alert)
- */
 interface ToastProps {
   message: string;
   type: "success" | "error";
@@ -220,11 +200,7 @@ const Toast: React.FC<ToastProps> = ({ message, type }) => (
     <span>{message}</span>
   </div>
 );
-// --- End Utility Components ---
 
-/**
- * Details and Edit Modal for Instructor
- */
 interface DetailsModalProps {
   instructor: InstructorDto;
   onClose: () => void;
@@ -328,13 +304,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            // Add Authorization header here if required
           },
           body: JSON.stringify(payload),
         }
       );
 
-      // 1. معالجة الأخطاء (4xx, 5xx)
       if (!response.ok) {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -344,7 +318,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
               `فشل تحديث بيانات المحاضر. (حالة: ${response.status})`
           );
         } else {
-          // التعامل مع استجابة نصية للخطأ أو استجابة غير JSON
           const errorText = await response.text();
           throw new Error(
             `فشل التحديث. حالة: ${response.status} - ${
@@ -354,32 +327,27 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
         }
       }
 
-      // 2. معالجة النجاح (2xx)
-      let updatedInstructorData: InstructorDto = { ...instructor }; // ابدأ بالبيانات القديمة
+      let updatedInstructorData: InstructorDto = { ...instructor };
       let successMessage = "تم تحديث بيانات المحاضر بنجاح.";
       const contentType = response.headers.get("content-type");
 
       if (response.status === 204) {
-        // حالة No Content - نعتمد على البيانات المحلية للنجاح
         updatedInstructorData.userDto = {
           ...updatedInstructorData.userDto,
           ...userDtoUpdate,
         };
         updatedInstructorData.enInstructorTitle = payload.enInstructorTitle;
       } else if (contentType && contentType.includes("application/json")) {
-        // الخادم يرجع البيانات المحدثة كـ JSON
         const data = await response.json();
         updatedInstructorData = data;
         if (data.message) {
           successMessage = data.message;
         }
       } else {
-        // الخادم يرجع نصاً عادياً (مثلاً "Successful") أو استجابة فارغة لكن ليست 204
         const successText = await response.text();
         if (successText) {
           successMessage = successText;
         }
-        // في هذه الحالة، نعتمد على البيانات المحلية المحدثة
         updatedInstructorData.userDto = {
           ...updatedInstructorData.userDto,
           ...userDtoUpdate,
@@ -387,7 +355,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
         updatedInstructorData.enInstructorTitle = payload.enInstructorTitle;
       }
 
-      // تحديث اللقب الأكاديمي للـ DTO
       const updatedInstructor: InstructorDto = {
         ...updatedInstructorData,
         instructorTitle:
@@ -396,9 +363,8 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           )?.title || "غير محدد",
       };
 
-      onUpdate(updatedInstructor, successMessage); // Update the state in the parent component
-      setIsEditing(false); // إيقاف وضع التعديل
-      // Reset password fields in local state after successful update
+      onUpdate(updatedInstructor, successMessage);
+      setIsEditing(false);
       setEditData((prev) => ({ ...prev, password: "", confirmPassword: "" }));
     } catch (error) {
       const errorMessage =
@@ -421,7 +387,8 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start border-b pb-3 mb-4">
-          <h3 className="text-xl font-bold text-indigo-600">
+          {/* تم تغيير اللون الأساسي إلى الأزرق */}
+          <h3 className="text-xl font-bold text-blue-600">
             {isEditing ? "تعديل بيانات المحاضر" : "عرض بيانات المحاضر"}
           </h3>
           <button
@@ -443,9 +410,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
         )}
 
         <div className="space-y-4">
-          {/* Form Fields - Code structure for fields remains the same */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 الاسم
@@ -467,7 +432,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
               )}
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 البريد الإلكتروني
@@ -489,7 +453,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
               )}
             </div>
 
-            {/* Phone */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 رقم الهاتف
@@ -511,7 +474,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
               )}
             </div>
 
-            {/* National No */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 الرقم الوطني
@@ -534,7 +496,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Instructor Title */}
           <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               اللقب الأكاديمي
@@ -568,7 +529,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             )}
           </div>
 
-          {/* Password Fields (Only shown during editing) */}
           {isEditing && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4 mt-4">
               <div className="relative">
@@ -636,7 +596,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           )}
         </div>
 
-        {/* Footer Actions */}
         <div className="flex justify-end gap-3 mt-6 border-t pt-4">
           <button
             onClick={() => onDeleteRequest(instructor.userDto.id)}
@@ -651,8 +610,8 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
               onClick={handleSave}
               className={`px-4 py-2 rounded-lg transition flex items-center justify-center ${
                 isLoading
-                  ? "bg-indigo-400 cursor-not-allowed"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  ? "bg-blue-400 cursor-not-allowed" // تم التعديل
+                  : "bg-blue-600 text-white hover:bg-blue-700" // تم التعديل
               }`}
               disabled={isLoading}
             >
@@ -666,7 +625,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center" // تم التعديل
             >
               <Edit className="w-5 h-5 ml-2" />
               تعديل
@@ -697,9 +656,6 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   );
 };
 
-// ----------------------
-// Add Instructor Modal
-// ----------------------
 interface AddInstructorModalProps {
   onClose: () => void;
   onSuccess: (newInstructor: InstructorDto | null, message: string) => void; // Added message
@@ -773,7 +729,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
         phone: formData.phone,
         nationalNo: formData.nationalNo,
         profileImage: null,
-        roleId: 2, // Assuming roleId 2 is for Instructors
+        roleId: 2,
       };
 
       const payload: CreateInstructorPayload = {
@@ -789,7 +745,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
         body: JSON.stringify(payload),
       });
 
-      // 1. معالجة الأخطاء (4xx, 5xx)
       if (!response.ok) {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -807,7 +762,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
         }
       }
 
-      // 2. معالجة النجاح (2xx)
       let newInstructorData: InstructorDto | null = null;
       let successMessage = "تم إضافة المحاضر بنجاح.";
       const contentType = response.headers.get("content-type");
@@ -817,7 +771,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
         contentType &&
         contentType.includes("application/json")
       ) {
-        // الخادم يرجع بيانات المحاضر الجديد كـ JSON
         const data = await response.json();
         newInstructorData = {
           ...data,
@@ -829,14 +782,12 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
           successMessage = data.message;
         }
       } else if (response.status !== 204) {
-        // الخادم يرجع نصاً عادياً (مثلاً "Successful")
         const successText = await response.text();
         if (successText) {
           successMessage = successText;
         }
       }
 
-      // يتم إغلاق المودال هنا عبر استدعاء onSuccess
       onSuccess(newInstructorData, successMessage);
     } catch (error) {
       const errorMessage =
@@ -858,11 +809,9 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
         className="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header and Form Body - Content structure remains the same */}
         <div className="flex justify-between items-start border-b pb-3 mb-4">
-          <h2 className="text-2xl font-bold text-indigo-700">
-            إضافة محاضر جديد
-          </h2>
+          {/* تم تغيير اللون الأساسي إلى الأزرق */}
+          <h2 className="text-2xl font-bold text-blue-700">إضافة محاضر جديد</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition"
@@ -883,7 +832,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
 
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Name */}
             <div>
               <label
                 htmlFor="add-name"
@@ -906,7 +854,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
               )}
             </div>
 
-            {/* Email */}
             <div>
               <label
                 htmlFor="add-email"
@@ -929,7 +876,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
               )}
             </div>
 
-            {/* Phone */}
             <div>
               <label
                 htmlFor="add-phone"
@@ -952,7 +898,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
               )}
             </div>
 
-            {/* National No */}
             <div>
               <label
                 htmlFor="add-nationalNo"
@@ -975,7 +920,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
               )}
             </div>
 
-            {/* Password */}
             <div className="relative">
               <label
                 htmlFor="add-password"
@@ -1005,7 +949,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
               )}
             </div>
 
-            {/* Confirm Password */}
             <div className="relative">
               <label
                 htmlFor="add-confirmPassword"
@@ -1037,7 +980,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
               )}
             </div>
 
-            {/* Instructor Title */}
             <div className="flex flex-col space-y-1 sm:col-span-2">
               <label
                 htmlFor="add-instructorTitle"
@@ -1050,7 +992,8 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 name="instructorTitle"
                 value={formData.instructorTitle}
                 onChange={handleChange}
-                className={`p-2 border bg-white rounded-lg focus:ring-indigo-500 focus:border-indigo-500 ${
+                // تم تغيير التركيز (Focus) إلى الأزرق
+                className={`p-2 border bg-white rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
                   errors.instructorTitle ? "border-red-500" : "border-gray-300"
                 }`}
               >
@@ -1070,7 +1013,6 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="p-5 border-t border-gray-200 flex justify-end">
           <button
             onClick={onClose}
@@ -1083,8 +1025,8 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             onClick={handleSave}
             className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition flex items-center ${
               isLoading
-                ? "bg-indigo-400 cursor-not-allowed"
-                : "bg-indigo-600 hover:bg-indigo-700"
+                ? "bg-blue-400 cursor-not-allowed" // تم التعديل
+                : "bg-blue-600 hover:bg-blue-700" // تم التعديل
             }`}
             disabled={isLoading}
           >
@@ -1101,21 +1043,18 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
   );
 };
 
-// --- Main Component ---
-
 const InstructorsPage: React.FC = () => {
   const [instructors, setInstructors] = useState<InstructorDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selected, setSelected] = useState<InstructorDto | null>(null); // For Details/Edit Modal
-  const [addModal, setAddModal] = useState(false); // For Add Modal
-  const [deleteId, setDeleteId] = useState<number | null>(null); // For Confirmation Modal
+  const [selected, setSelected] = useState<InstructorDto | null>(null);
+  const [addModal, setAddModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
 
-  // Toast handler
   const showToast = useCallback(
     (message: string, type: "success" | "error") => {
       setToast({ message, type });
@@ -1129,9 +1068,7 @@ const InstructorsPage: React.FC = () => {
     try {
       const response = await fetch(`${API_URL}${BASE_API_PATH}`, {
         method: "GET",
-        headers: {
-          // Add Authorization header here if required
-        },
+        headers: {},
       });
 
       if (!response.ok) {
@@ -1165,10 +1102,7 @@ const InstructorsPage: React.FC = () => {
     fetchInstructors();
   }, [fetchInstructors]);
 
-  // --- CRUD Handlers ---
-
   const handleUpdate = (updatedInstructor: InstructorDto, message: string) => {
-    // 1. تحديث القائمة (سواء كانت البيانات جديدة أو قديمة معتمدة على local state)
     setInstructors((prev) =>
       prev.map((inst) =>
         inst.userDto.id === updatedInstructor.userDto.id
@@ -1176,55 +1110,39 @@ const InstructorsPage: React.FC = () => {
           : inst
       )
     );
-    // 2. تحديث الـ Modal بالبيانات الجديدة والبقاء فيه
     setSelected(updatedInstructor);
-    // 3. عرض رسالة النجاح
     showToast(message, "success");
-    // 4. لا حاجة لإغلاق الـ Modal، فقط إيقاف وضع التعديل (تم داخل المكون)
   };
 
-  /**
-   * دالة معالجة نجاح الإضافة
-   * @param newInstructor - المحاضر الجديد (قد يكون null إذا لم يعد الخادم بيانات JSON)
-   * @param message - رسالة النجاح المسترجعة من الخادم (أو رسالة افتراضية)
-   */
   const handleAddSuccess = (
     newInstructor: InstructorDto | null,
     message: string
   ) => {
-    // إذا عاد المحاضر الجديد، نضيفه مباشرة إلى القائمة
     if (newInstructor) {
       setInstructors((prev) => [...prev, newInstructor]);
     } else {
-      // إذا لم يعد بيانات (لأن الخادم رجع نص أو 204)، نطلب جلب البيانات مجدداً لضمان التحديث
       fetchInstructors();
     }
-    setAddModal(false); // إغلاق Add Modal
-    showToast(message, "success"); // عرض رسالة النجاح
+    setAddModal(false);
+    showToast(message, "success");
   };
 
   const requestDelete = (id: number) => {
     setDeleteId(id);
-    setSelected(null); // إغلاق Details Modal لتركيز المستخدم على التأكيد
+    setSelected(null);
   };
 
-  // --------------------------------------------------------------------------------------------------
-  // دالة الحذف (Delete) - تطبيق المنطق القوي لمعالجة الاستجابة
-  // --------------------------------------------------------------------------------------------------
   const handleDelete = useCallback(
     async (id: number | null) => {
       if (id === null) return;
-      setIsLoading(true); // استخدام isLoading هنا لتغطية حالة الحذف
+      setIsLoading(true);
 
       try {
         const response = await fetch(`${API_URL}${BASE_API_PATH}/${id}`, {
           method: "DELETE",
-          headers: {
-            // Add Authorization header here if required
-          },
+          headers: {},
         });
 
-        // 1. معالجة الأخطاء (4xx, 5xx)
         if (!response.ok) {
           const contentType = response.headers.get("content-type");
           if (contentType && contentType.includes("application/json")) {
@@ -1242,11 +1160,9 @@ const InstructorsPage: React.FC = () => {
           }
         }
 
-        // 2. معالجة النجاح (2xx)
         let successMessage = "تم حذف المحاضر بنجاح.";
         const contentType = response.headers.get("content-type");
 
-        // إذا كانت الحالة ليست 204 وكان نوع المحتوى JSON
         if (
           response.status !== 204 &&
           contentType &&
@@ -1257,16 +1173,14 @@ const InstructorsPage: React.FC = () => {
             successMessage = data.message;
           }
         } else if (response.status !== 204) {
-          // إذا كان نصاً عادياً (مثلاً "Successful") أو استجابة فارغة لكن ليست 204
           const successText = await response.text();
           if (successText) {
             successMessage = successText;
           }
         }
 
-        // تحديث الواجهة
         setInstructors((prev) => prev.filter((inst) => inst.userDto.id !== id));
-        setDeleteId(null); // إغلاق Confirmation Modal
+        setDeleteId(null);
         showToast(successMessage, "success");
       } catch (error) {
         console.error("Delete Error:", error);
@@ -1274,16 +1188,13 @@ const InstructorsPage: React.FC = () => {
           error instanceof Error ? error.message : "خطأ في عملية الحذف.",
           "error"
         );
-        setDeleteId(null); // إغلاق Confirmation Modal حتى في حالة الخطأ
+        setDeleteId(null);
       } finally {
         setIsLoading(false);
       }
     },
     [showToast]
   );
-  // --------------------------------------------------------------------------------------------------
-
-  // --- Filtering/Search ---
 
   const filteredInstructors = useMemo(() => {
     const lowerCaseSearch = searchTerm.toLowerCase();
@@ -1298,7 +1209,7 @@ const InstructorsPage: React.FC = () => {
   }, [instructors, searchTerm]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8" dir="rtl">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 rounded-3xl" dir="rtl">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-3xl font-extrabold text-gray-900 mb-4 sm:mb-0">
           إدارة المحاضرين
@@ -1306,7 +1217,8 @@ const InstructorsPage: React.FC = () => {
         <div className="flex space-x-3 space-x-reverse w-full sm:w-auto">
           <button
             onClick={() => setAddModal(true)}
-            className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition shadow-lg w-full sm:w-auto"
+            // تم تغيير لون زر الإضافة الرئيسي إلى الأزرق
+            className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition shadow-lg w-full sm:w-auto"
           >
             <Plus size={20} className="ml-2" />
             إضافة محاضر جديد
@@ -1314,7 +1226,6 @@ const InstructorsPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Search Bar and Stats */}
       <div className="bg-white p-5 rounded-2xl shadow-lg mb-6 flex flex-col md:flex-row items-center justify-between">
         <div className="relative w-full md:w-1/2 mb-4 md:mb-0">
           <input
@@ -1322,26 +1233,25 @@ const InstructorsPage: React.FC = () => {
             placeholder="ابحث بالاسم، البريد الإلكتروني، أو الرقم الوطني..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full py-2 pr-10 pl-4 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition text-right"
+            // تم تغيير التركيز (Focus) إلى الأزرق
+            className="w-full py-2 pr-10 pl-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition text-right"
           />
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         </div>
         <p className="text-gray-600 font-semibold">
-          إجمالي المحاضرين:{" "}
-          <span className="text-indigo-600 text-xl">{instructors.length}</span>
+          إجمالي المحاضرين: {/* تم تغيير لون الرقم الإجمالي إلى الأزرق */}
+          <span className="text-blue-600 text-xl">{instructors.length}</span>
         </p>
       </div>
 
-      {/* Loading State */}
-      {isLoading &&
-        deleteId === null && ( // لا تعرض حالة تحميل إذا كان التحميل للحذف فقط
-          <div className="flex justify-center items-center py-10 text-indigo-600">
-            <Loader2 className="w-8 h-8 animate-spin ml-2" />
-            <p className="text-lg">جاري تحميل البيانات...</p>
-          </div>
-        )}
+      {isLoading && deleteId === null && (
+        // تم تغيير لون أيقونة التحميل إلى الأزرق
+        <div className="flex justify-center items-center py-10 text-blue-600">
+          <Loader2 className="w-8 h-8 animate-spin ml-2" />
+          <p className="text-lg">جاري تحميل البيانات...</p>
+        </div>
+      )}
 
-      {/* Instructors Table */}
       {!isLoading && filteredInstructors.length > 0 ? (
         <div className="overflow-x-auto bg-white rounded-2xl shadow-lg">
           <table className="min-w-full divide-y divide-gray-200">
@@ -1365,7 +1275,8 @@ const InstructorsPage: React.FC = () => {
               {filteredInstructors.map((inst) => (
                 <tr
                   key={inst.userDto.id}
-                  className="hover:bg-indigo-50 transition duration-150 ease-in-out cursor-pointer"
+                  // تم تغيير تظليل الصف عند المرور إلى الأخضر الفاتح
+                  className="hover:bg-green-50 transition duration-150 ease-in-out cursor-pointer"
                   onClick={() => setSelected(inst)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
@@ -1384,7 +1295,8 @@ const InstructorsPage: React.FC = () => {
                         setSelected(inst);
                       }}
                       title="تعديل/عرض التفاصيل"
-                      className="text-indigo-600 hover:text-indigo-800 transition p-1 bg-indigo-100 rounded-full"
+                      // تم تغيير لون الأيقونة إلى الأزرق واستخدام خلفية خفيفة بالأخضر
+                      className="text-blue-600 hover:text-blue-800 transition p-1 bg-green-100 rounded-full"
                     >
                       <Edit size={18} />
                     </button>
@@ -1414,7 +1326,6 @@ const InstructorsPage: React.FC = () => {
         )
       )}
 
-      {/* Details/Edit Modal */}
       {selected && (
         <DetailsModal
           instructor={selected}
@@ -1424,7 +1335,6 @@ const InstructorsPage: React.FC = () => {
         />
       )}
 
-      {/* Add Instructor Modal */}
       {addModal && (
         <AddInstructorModal
           onClose={() => setAddModal(false)}
@@ -1432,7 +1342,6 @@ const InstructorsPage: React.FC = () => {
         />
       )}
 
-      {/* Custom Confirmation Modal */}
       {deleteId !== null && (
         <ConfirmationModal
           title="تأكيد الحذف"
@@ -1443,7 +1352,6 @@ const InstructorsPage: React.FC = () => {
         />
       )}
 
-      {/* Toast Notification */}
       {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
