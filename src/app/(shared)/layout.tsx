@@ -13,8 +13,10 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { usePathname } from "next/navigation";
+import { ThemeContext } from "@/context/ThemeContext";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 
 interface Tab {
   href: string;
@@ -28,6 +30,7 @@ export default function SharedDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { theme } = useContext(ThemeContext); // جلب الثيم
   const pathname = usePathname();
   const [isUsersOpen, setIsUsersOpen] = useState(pathname.startsWith("/users"));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -72,10 +75,17 @@ export default function SharedDashboardLayout({
   };
 
   return (
-    <div className="flex min-h-screen relative" dir="rtl">
+    <div
+      className={`${
+        theme === "dark"
+          ? "bg-gray-900 text-gray-100"
+          : "bg-gray-50 text-gray-900"
+      } flex min-h-screen relative`}
+      dir="rtl"
+    >
       {isMobile && (
         <button
-          className="fixed top-4 right-4 z-30 bg-gradient-to-r from-green-600 to-blue-600 text-white p-3 rounded-lg shadow-lg"
+          className="fixed top-4 right-4 z-30 bg-gradient-to-r from-emerald-600 to-blue-600 text-white p-3 rounded-lg shadow-lg"
           onClick={() => setIsSidebarOpen(true)}
         >
           <Menu size={22} />
@@ -93,12 +103,22 @@ export default function SharedDashboardLayout({
         initial={{ x: isMobile ? 300 : 0 }}
         animate={{ x: isMobile && !isSidebarOpen ? 300 : 0 }}
         transition={{ duration: 0.4 }}
-        className={`w-64 bg-white/90 backdrop-blur-md text-slate-800 flex flex-col justify-between shadow-2xl border-l border-slate-200 fixed top-0 right-0 h-full z-30 ${
+        className={`w-64 ${
+          theme === "dark"
+            ? "bg-gray-900/90 text-gray-200 border-gray-700"
+            : "bg-white/90 text-slate-800 border-slate-200"
+        } backdrop-blur-md flex flex-col justify-between shadow-2xl fixed top-0 right-0 h-full z-30 ${
           isMobile ? "rounded-l-2xl" : ""
         }`}
       >
         <div>
-          <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-green-500 to-blue-500 text-white flex justify-between items-center rounded-tl-2xl">
+          <div
+            className={`${
+              theme === "dark"
+                ? "bg-gray-800 text-white border-gray-700"
+                : "bg-gradient-to-r from-green-500 to-blue-500 text-white border-slate-200"
+            } p-6 flex justify-between items-center rounded-tl-2xl`}
+          >
             <div className="flex items-center gap-3">
               <img
                 src="/faculty-logo.png"
@@ -106,6 +126,7 @@ export default function SharedDashboardLayout({
                 className="w-10 h-10 rounded-full shadow-md border border-white/50"
               />
               <h1 className="text-2xl font-bold tracking-wide">لوحة التحكم</h1>
+              <ThemeSwitch />
             </div>
 
             {isMobile && (
@@ -125,11 +146,15 @@ export default function SharedDashboardLayout({
                   <div key={tab.href} className="flex flex-col">
                     <button
                       onClick={() => setIsUsersOpen(!isUsersOpen)}
-                      className={`flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-right font-medium transition-all duration-300 hover:bg-green-50 hover:text-blue-700 w-full ${
+                      className={`flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-right font-medium transition-all duration-300 ${
                         isUsersOpen
-                          ? "bg-green-100 text-blue-700"
-                          : "text-slate-800"
-                      }`}
+                          ? theme === "dark"
+                            ? "bg-emerald-900/40 text-emerald-300"
+                            : "bg-emerald-100 text-emerald-800"
+                          : theme === "dark"
+                          ? "text-slate-300 hover:bg-emerald-900/20 hover:text-emerald-300"
+                          : "text-slate-800 hover:bg-emerald-50 hover:text-emerald-700"
+                      } w-full`}
                     >
                       <div className="flex items-center gap-3">
                         <tab.icon size={20} />
@@ -157,8 +182,12 @@ export default function SharedDashboardLayout({
                             onClick={() => isMobile && setIsSidebarOpen(false)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
                               isActive(child.href)
-                                ? "bg-green-200 text-blue-900 font-semibold"
-                                : "text-slate-600 hover:bg-green-50 hover:text-blue-700"
+                                ? theme === "dark"
+                                  ? "bg-emerald-900/40 text-emerald-300 font-semibold"
+                                  : "bg-emerald-200 text-emerald-900 font-semibold"
+                                : theme === "dark"
+                                ? "text-slate-300 hover:bg-emerald-900/20 hover:text-emerald-300"
+                                : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
                             }`}
                           >
                             {child.label}
@@ -174,8 +203,12 @@ export default function SharedDashboardLayout({
                     onClick={() => isMobile && setIsSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg text-right font-medium transition-all duration-300 ${
                       isActive(tab.href)
-                        ? "bg-green-100 text-blue-700"
-                        : "hover:bg-green-50 hover:text-blue-700 text-slate-800"
+                        ? theme === "dark"
+                          ? "bg-emerald-900/40 text-emerald-300"
+                          : "bg-emerald-100 text-emerald-800"
+                        : theme === "dark"
+                        ? "text-slate-300 hover:bg-emerald-900/20 hover:text-emerald-300"
+                        : "hover:bg-emerald-50 hover:text-emerald-700 text-slate-800"
                     }`}
                   >
                     <tab.icon size={20} />
@@ -189,7 +222,11 @@ export default function SharedDashboardLayout({
 
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center gap-2 bg-red-500 text-white py-3 mx-4 mb-5 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300 shadow-md"
+          className={`flex items-center justify-center gap-2 py-3 mx-4 mb-5 rounded-lg font-semibold shadow-md transition-all duration-300 ${
+            theme === "dark"
+              ? "bg-red-600 text-white hover:bg-red-700"
+              : "bg-red-500 text-white hover:bg-red-600"
+          }`}
         >
           <LogOut size={18} />
           تسجيل الخروج
@@ -197,9 +234,13 @@ export default function SharedDashboardLayout({
       </motion.aside>
 
       <main
-        className={`flex-1 p-8 rounded-s-3xl shadow-inner m-2 transition-all duration-300 ${
+        className={`flex-1 p-8 rounded-3xl shadow-inner m-2 transition-all duration-300 ${
           isMobile ? "mr-0" : "mr-72"
-        } bg-white/70 backdrop-blur-sm`}
+        } ${
+          theme === "dark"
+            ? "bg-gray-800/70 text-gray-100"
+            : "bg-white/70 text-gray-900"
+        } backdrop-blur-sm`}
         style={{
           backgroundImage: `url('/cover2.png')`,
           backgroundSize: "cover",

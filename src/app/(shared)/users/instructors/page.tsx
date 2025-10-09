@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useContext,
+} from "react";
 import {
   Search,
   Plus,
@@ -14,9 +20,9 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { ThemeContext } from "@/context/ThemeContext";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const BASE_API_PATH = "/Instructor";
 
 const validateNationalId = (nationalId: string): string | null => {
@@ -116,7 +122,6 @@ interface ValidationErrors {
   apiError?: string;
 }
 
-// **تم تعديل القائمة لتشمل (1: دكتور، 2: معيد) فقط**
 const INSTRUCTOR_TITLES = [
   { id: 1, title: "دكتور" },
   { id: 2, title: "معيد" },
@@ -136,48 +141,67 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   onCancel,
   isLoading,
-}) => (
-  <div className="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
-      <div className="flex justify-between items-start border-b pb-3 mb-4">
-        <h3 className="text-xl font-bold text-red-600 flex items-center">
-          <AlertTriangle className="w-6 h-6 ml-2" /> {title}
-        </h3>
-        <button
-          onClick={onCancel}
-          className="text-gray-400 hover:text-gray-600"
-        >
-          <X size={24} />
-        </button>
-      </div>
-      <p className="text-gray-700 mb-6">{message}</p>
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-          disabled={isLoading}
-        >
-          إلغاء
-        </button>
-        <button
-          onClick={onConfirm}
-          className={`px-4 py-2 rounded-lg transition flex items-center justify-center ${
-            isLoading
-              ? "bg-red-400 cursor-not-allowed"
-              : "bg-red-600 text-white hover:bg-red-700"
-          }`}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            "تأكيد الحذف"
-          )}
-        </button>
+}) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
+
+  return (
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 flex items-center justify-center p-4">
+      <div
+        className={`rounded-xl shadow-2xl w-full max-w-lg p-6 ${
+          isDark ? "bg-slate-800 text-gray-100" : "bg-white"
+        }`}
+      >
+        <div className="flex justify-between items-start border-b pb-3 mb-4">
+          <h3 className="text-xl font-bold text-red-600 flex items-center">
+            <AlertTriangle className="w-6 h-6 ml-2" /> {title}
+          </h3>
+          <button
+            onClick={onCancel}
+            className={
+              isDark
+                ? "text-slate-400 hover:text-gray-200"
+                : "text-gray-400 hover:text-gray-600"
+            }
+          >
+            <X size={24} />
+          </button>
+        </div>
+        <p className={isDark ? "text-slate-300 mb-6" : "text-gray-700 mb-6"}>
+          {message}
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className={`px-4 py-2 rounded-lg transition ${
+              isDark
+                ? "bg-slate-700 text-gray-200 hover:bg-slate-600"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
+            disabled={isLoading}
+          >
+            إلغاء
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`px-4 py-2 rounded-lg transition flex items-center justify-center ${
+              isLoading
+                ? "bg-red-400 cursor-not-allowed text-white"
+                : "bg-red-600 text-white hover:bg-red-700"
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              "تأكيد الحذف"
+            )}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface ToastProps {
   message: string;
@@ -214,6 +238,9 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   onUpdate,
   onDeleteRequest,
 }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
+
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -377,13 +404,33 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
     }
   };
 
+  const inputClass = (isEditing: boolean, hasError: boolean) =>
+    `w-full p-2 border rounded-lg ${
+      hasError
+        ? "border-red-500"
+        : isDark
+        ? "border-slate-700"
+        : "border-gray-300"
+    } ${
+      isEditing
+        ? isDark
+          ? "bg-slate-700 text-gray-100"
+          : "bg-white"
+        : isDark
+        ? "bg-slate-700 text-slate-400 cursor-default"
+        : "bg-gray-100 border-gray-200 cursor-default"
+    }`;
+
+  const labelClass = isDark ? "text-slate-300" : "text-gray-700";
+  const modalContentClass = isDark ? "bg-slate-800 text-gray-100" : "bg-white";
+
   return (
     <div
       className="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative"
+        className={`${modalContentClass} rounded-xl shadow-2xl w-full max-w-2xl p-6 relative`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start border-b pb-3 mb-4">
@@ -392,7 +439,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className={
+              isDark
+                ? "text-slate-400 hover:text-gray-200"
+                : "text-gray-400 hover:text-gray-600"
+            }
           >
             <X size={24} />
           </button>
@@ -411,7 +462,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className={`block text-sm font-medium mb-1 ${labelClass}`}>
                 الاسم
               </label>
               <input
@@ -420,11 +471,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                 value={editData.name}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className={`w-full p-2 border rounded-lg ${
-                  isEditing
-                    ? "bg-white border-gray-300"
-                    : "bg-gray-100 border-gray-200 cursor-default"
-                }`}
+                className={inputClass(isEditing, !!errors.name)}
               />
               {errors.name && (
                 <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -432,7 +479,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className={`block text-sm font-medium mb-1 ${labelClass}`}>
                 البريد الإلكتروني
               </label>
               <input
@@ -441,11 +488,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                 value={editData.email}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className={`w-full p-2 border rounded-lg ${
-                  isEditing
-                    ? "bg-white border-gray-300"
-                    : "bg-gray-100 border-gray-200 cursor-default"
-                }`}
+                className={inputClass(isEditing, !!errors.email)}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -453,7 +496,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className={`block text-sm font-medium mb-1 ${labelClass}`}>
                 رقم الهاتف
               </label>
               <input
@@ -462,11 +505,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                 value={editData.phone}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className={`w-full p-2 border rounded-lg ${
-                  isEditing
-                    ? "bg-white border-gray-300"
-                    : "bg-gray-100 border-gray-200 cursor-default"
-                }`}
+                className={inputClass(isEditing, !!errors.phone)}
               />
               {errors.phone && (
                 <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
@@ -474,7 +513,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className={`block text-sm font-medium mb-1 ${labelClass}`}>
                 الرقم الوطني
               </label>
               <input
@@ -483,11 +522,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                 value={editData.nationalNo}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className={`w-full p-2 border rounded-lg ${
-                  isEditing
-                    ? "bg-white border-gray-300"
-                    : "bg-gray-100 border-gray-200 cursor-default"
-                }`}
+                className={inputClass(isEditing, !!errors.nationalNo)}
               />
               {errors.nationalNo && (
                 <p className="text-red-500 text-xs mt-1">{errors.nationalNo}</p>
@@ -496,7 +531,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           </div>
 
           <div className="w-full">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>
               اللقب الأكاديمي
             </label>
             {isEditing ? (
@@ -504,7 +539,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                 name="enInstructorTitle"
                 value={editData.enInstructorTitle}
                 onChange={handleChange}
-                className="w-full p-2 border rounded-lg bg-white border-gray-300"
+                className={`w-full p-2 border rounded-lg ${
+                  isDark
+                    ? "bg-slate-700 text-gray-100 border-slate-700"
+                    : "bg-white border-gray-300"
+                }`}
               >
                 <option value="">-- اختر اللقب --</option>
                 {INSTRUCTOR_TITLES.map((title) => (
@@ -518,7 +557,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                 type="text"
                 value={titleText}
                 disabled
-                className="w-full p-2 border rounded-lg bg-gray-100 border-gray-200 cursor-default"
+                className={inputClass(isEditing, false)}
               />
             )}
             {errors.instructorTitle && (
@@ -529,9 +568,15 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           </div>
 
           {isEditing && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4 mt-4">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 mt-4 ${
+                isDark ? "border-t border-slate-700" : "border-t"
+              }`}
+            >
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  className={`block text-sm font-medium mb-1 ${labelClass}`}
+                >
                   كلمة المرور الجديدة
                 </label>
                 <input
@@ -540,7 +585,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                   value={editData.password}
                   onChange={handleChange}
                   placeholder="اتركه فارغًا للإبقاء على الكلمة القديمة"
-                  className="w-full p-2 border rounded-lg pr-10"
+                  className={`w-full p-2 border rounded-lg pr-10 ${
+                    isDark
+                      ? "bg-slate-700 text-gray-100 border-slate-700"
+                      : "border-gray-300"
+                  }`}
                 />
                 <button
                   type="button"
@@ -558,7 +607,9 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
               </div>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  className={`block text-sm font-medium mb-1 ${labelClass}`}
+                >
                   تأكيد كلمة المرور الجديدة
                 </label>
                 <input
@@ -567,7 +618,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                   value={editData.confirmPassword}
                   onChange={handleChange}
                   placeholder="أعد إدخال الكلمة الجديدة"
-                  className="w-full p-2 border rounded-lg pr-10"
+                  className={`w-full p-2 border rounded-lg pr-10 ${
+                    isDark
+                      ? "bg-slate-700 text-gray-100 border-slate-700"
+                      : "border-gray-300"
+                  }`}
                 />
                 <button
                   type="button"
@@ -595,7 +650,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           )}
         </div>
 
-        <div className="flex justify-end gap-3 mt-6 border-t pt-4">
+        <div
+          className={`flex justify-end gap-3 mt-6 pt-4 ${
+            isDark ? "border-t border-slate-700" : "border-t"
+          }`}
+        >
           <button
             onClick={() => onDeleteRequest(instructor.userDto.id)}
             className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition"
@@ -609,8 +668,8 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
               onClick={handleSave}
               className={`px-4 py-2 rounded-lg transition flex items-center justify-center ${
                 isLoading
-                  ? "bg-blue-400 cursor-not-allowed" // تم التعديل
-                  : "bg-blue-600 text-white hover:bg-blue-700" // تم التعديل
+                  ? "bg-emerald-400 cursor-not-allowed text-white"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
               }`}
               disabled={isLoading}
             >
@@ -624,7 +683,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center" // تم التعديل
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center"
             >
               <Edit className="w-5 h-5 ml-2" />
               تعديل
@@ -643,7 +702,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
                 });
                 setErrors({});
               }}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+              className={`px-4 py-2 rounded-lg transition ${
+                isDark
+                  ? "bg-slate-700 text-gray-200 hover:bg-slate-600"
+                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }`}
               disabled={isLoading}
             >
               إلغاء التعديل
@@ -664,6 +727,9 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
+
   const [formData, setFormData] = useState<
     Omit<CreateUserDto, "roleId" | "profileImage"> & { instructorTitle: string }
   >({
@@ -799,21 +865,40 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
     }
   };
 
+  const inputClass = (hasError: boolean) =>
+    `w-full p-2 border rounded-lg ${
+      hasError
+        ? "border-red-500"
+        : isDark
+        ? "border-slate-700"
+        : "border-gray-300"
+    } ${isDark ? "bg-slate-700 text-gray-100" : "bg-white"}`;
+
+  const labelClass = isDark ? "text-slate-300" : "text-gray-700";
+  const modalContentClass = isDark ? "bg-slate-800 text-gray-100" : "bg-white";
+
   return (
     <div
       className="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 relative"
+        className={`${modalContentClass} rounded-xl shadow-2xl w-full max-w-xl relative`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start border-b pb-3 mb-4">
-          {/* تم تغيير اللون الأساسي إلى الأزرق */}
+        <div
+          className={`flex justify-between items-start border-b pb-3 mb-4 p-6 ${
+            isDark ? "border-slate-700" : ""
+          }`}
+        >
           <h2 className="text-2xl font-bold text-blue-700">إضافة محاضر جديد</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition"
+            className={
+              isDark
+                ? "text-slate-400 hover:text-gray-200 transition"
+                : "text-gray-400 hover:text-gray-600 transition"
+            }
           >
             <X size={24} />
           </button>
@@ -821,7 +906,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
 
         {errors.apiError && (
           <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center"
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center mx-6"
             role="alert"
           >
             <AlertTriangle className="w-5 h-5 ml-2" />
@@ -829,12 +914,12 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
           </div>
         )}
 
-        <div className="p-6 space-y-4">
+        <div className="px-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="add-name"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className={`block text-sm font-medium mb-1 ${labelClass}`}
               >
                 الاسم
               </label>
@@ -844,9 +929,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full p-2 border rounded-lg ${
-                  errors.name ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(!!errors.name)}
               />
               {errors.name && (
                 <p className="text-xs text-red-500 pt-1">{errors.name}</p>
@@ -856,7 +939,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             <div>
               <label
                 htmlFor="add-email"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className={`block text-sm font-medium mb-1 ${labelClass}`}
               >
                 البريد الإلكتروني
               </label>
@@ -866,9 +949,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full p-2 border rounded-lg ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(!!errors.email)}
               />
               {errors.email && (
                 <p className="text-xs text-red-500 pt-1">{errors.email}</p>
@@ -878,7 +959,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             <div>
               <label
                 htmlFor="add-phone"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className={`block text-sm font-medium mb-1 ${labelClass}`}
               >
                 رقم الهاتف
               </label>
@@ -888,9 +969,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 type="text"
                 value={formData.phone}
                 onChange={handleChange}
-                className={`w-full p-2 border rounded-lg ${
-                  errors.phone ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(!!errors.phone)}
               />
               {errors.phone && (
                 <p className="text-xs text-red-500 pt-1">{errors.phone}</p>
@@ -900,7 +979,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             <div>
               <label
                 htmlFor="add-nationalNo"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className={`block text-sm font-medium mb-1 ${labelClass}`}
               >
                 الرقم القومي
               </label>
@@ -910,9 +989,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 type="text"
                 value={formData.nationalNo}
                 onChange={handleChange}
-                className={`w-full p-2 border rounded-lg ${
-                  errors.nationalNo ? "border-red-500" : "border-gray-300"
-                }`}
+                className={inputClass(!!errors.nationalNo)}
               />
               {errors.nationalNo && (
                 <p className="text-xs text-red-500 pt-1">{errors.nationalNo}</p>
@@ -922,7 +999,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             <div className="relative">
               <label
                 htmlFor="add-password"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className={`block text-sm font-medium mb-1 ${labelClass}`}
               >
                 كلمة المرور
               </label>
@@ -933,8 +1010,12 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 value={formData.password}
                 onChange={handleChange}
                 className={`w-full p-2 border rounded-lg pr-10 ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                }`}
+                  errors.password
+                    ? "border-red-500"
+                    : isDark
+                    ? "border-slate-700"
+                    : "border-gray-300"
+                } ${isDark ? "bg-slate-700 text-gray-100" : "bg-white"}`}
               />
               <button
                 type="button"
@@ -951,7 +1032,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             <div className="relative">
               <label
                 htmlFor="add-confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className={`block text-sm font-medium mb-1 ${labelClass}`}
               >
                 تأكيد كلمة المرور
               </label>
@@ -962,8 +1043,12 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className={`w-full p-2 border rounded-lg pr-10 ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                }`}
+                  errors.confirmPassword
+                    ? "border-red-500"
+                    : isDark
+                    ? "border-slate-700"
+                    : "border-gray-300"
+                } ${isDark ? "bg-slate-700 text-gray-100" : "bg-white"}`}
               />
               <button
                 type="button"
@@ -982,7 +1067,7 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             <div className="flex flex-col space-y-1 sm:col-span-2">
               <label
                 htmlFor="add-instructorTitle"
-                className="text-sm font-medium text-gray-700"
+                className={`text-sm font-medium ${labelClass}`}
               >
                 المسمى الوظيفي (كود)
               </label>
@@ -991,9 +1076,13 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
                 name="instructorTitle"
                 value={formData.instructorTitle}
                 onChange={handleChange}
-                className={`p-2 border bg-white rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.instructorTitle ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`p-2 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500 ${
+                  errors.instructorTitle
+                    ? "border-red-500"
+                    : isDark
+                    ? "border-slate-700"
+                    : "border-gray-300"
+                } ${isDark ? "bg-slate-700 text-gray-100" : "bg-white"}`}
               >
                 <option value="">-- اختر المسمى --</option>
                 {INSTRUCTOR_TITLES.map((title) => (
@@ -1011,10 +1100,18 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
           </div>
         </div>
 
-        <div className="p-5 border-t border-gray-200 flex justify-end">
+        <div
+          className={`p-5 border-t flex justify-end mt-6 ${
+            isDark ? "border-slate-700" : "border-gray-200"
+          }`}
+        >
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition ml-3 rtl:mr-3"
+            className={`px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-300 transition ml-3 rtl:mr-3 ${
+              isDark
+                ? "bg-slate-700 text-gray-200 hover:bg-slate-600"
+                : "bg-gray-200 text-gray-700"
+            }`}
             disabled={isLoading}
           >
             إلغاء
@@ -1023,8 +1120,8 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
             onClick={handleSave}
             className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition flex items-center ${
               isLoading
-                ? "bg-blue-400 cursor-not-allowed" // تم التعديل
-                : "bg-blue-600 hover:bg-blue-700" // تم التعديل
+                ? "bg-emerald-400 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700"
             }`}
             disabled={isLoading}
           >
@@ -1042,6 +1139,9 @@ const AddInstructorModal: React.FC<AddInstructorModalProps> = ({
 };
 
 const InstructorsPage: React.FC = () => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
+
   const [instructors, setInstructors] = useState<InstructorDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -1206,16 +1306,36 @@ const InstructorsPage: React.FC = () => {
     );
   }, [instructors, searchTerm]);
 
+  const mainBgClass = isDark ? "bg-slate-900/90 text-gray-100" : "bg-gray-50";
+  const headerBgClass = isDark
+    ? "bg-slate-800 shadow-xl"
+    : "bg-white shadow-lg";
+  const tableBgClass = isDark ? "bg-slate-800 shadow-xl" : "bg-white shadow-lg";
+  const textClass = isDark ? "text-gray-100" : "text-gray-900";
+  const secondaryTextClass = isDark ? "text-slate-400" : "text-gray-600";
+  const searchInputClass = isDark
+    ? "bg-slate-700 text-gray-100 border-slate-700 focus:ring-emerald-500 focus:border-emerald-500"
+    : "bg-white border-gray-300 focus:ring-blue-500 focus:border-blue-500";
+  const tableHeaderBgClass = isDark ? "bg-slate-700" : "bg-gray-50";
+  const tableHeaderTextColor = isDark ? "text-slate-300" : "text-gray-500";
+  const tableRowHoverClass = isDark
+    ? "hover:bg-slate-700"
+    : "hover:bg-green-50";
+  const tableRowDividerClass = isDark ? "divide-slate-700" : "divide-gray-200";
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 rounded-3xl " dir="rtl">
+    <div
+      className={`min-h-screen p-4 sm:p-6 lg:p-8 rounded-3xl ${mainBgClass}`}
+      dir="rtl"
+    >
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-4 sm:mb-0">
+        <h1 className={`text-3xl font-extrabold mb-4 sm:mb-0 ${textClass}`}>
           إدارة المحاضرين
         </h1>
         <div className="flex space-x-3 space-x-reverse w-full sm:w-auto">
           <button
             onClick={() => setAddModal(true)}
-            className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition shadow-lg w-full sm:w-auto"
+            className="flex items-center justify-center px-4 py-2 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition shadow-lg w-full sm:w-auto"
           >
             <Plus size={20} className="ml-2" />
             إضافة محاضر جديد
@@ -1223,64 +1343,89 @@ const InstructorsPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="bg-white p-5 rounded-2xl shadow-lg mb-6 flex flex-col md:flex-row items-center justify-between">
+      <div
+        className={`${headerBgClass} p-5 rounded-2xl mb-6 flex flex-col md:flex-row items-center justify-between`}
+      >
         <div className="relative w-full md:w-1/2 mb-4 md:mb-0">
           <input
             type="text"
             placeholder="ابحث بالاسم، البريد الإلكتروني، أو الرقم الوطني..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full py-2 pr-10 pl-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition text-right"
+            className={`w-full py-2 pr-10 pl-4 border rounded-xl transition text-right ${searchInputClass}`}
           />
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
         </div>
-        <p className="text-gray-600 font-semibold">
+        <p className={`font-semibold ${secondaryTextClass}`}>
           إجمالي المحاضرين:
-          <span className="text-blue-600 text-xl">{instructors.length}</span>
+          <span className="text-emerald-500 text-xl">{instructors.length}</span>
         </p>
       </div>
 
       {isLoading && deleteId === null && (
-        <div className="flex justify-center items-center py-10 text-blue-600">
+        <div className="flex justify-center items-center py-10 text-emerald-600">
           <Loader2 className="w-8 h-8 animate-spin ml-2" />
           <p className="text-lg">جاري تحميل البيانات...</p>
         </div>
       )}
 
       {!isLoading && filteredInstructors.length > 0 ? (
-        <div className="overflow-x-auto bg-white rounded-2xl shadow-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className={`overflow-x-auto rounded-2xl ${tableBgClass}`}>
+          <table className={`min-w-full divide-y ${tableRowDividerClass}`}>
+            <thead className={tableHeaderBgClass}>
               <tr>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${tableHeaderTextColor}`}
+                >
                   الاسم
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                <th
+                  className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider hidden sm:table-cell ${tableHeaderTextColor}`}
+                >
                   البريد الإلكتروني
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                <th
+                  className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider hidden md:table-cell ${tableHeaderTextColor}`}
+                >
                   اللقب
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${tableHeaderTextColor}`}
+                >
                   الإجراءات
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody
+              className={`divide-y ${tableRowDividerClass} ${
+                isDark ? "bg-slate-800" : "bg-white"
+              }`}
+            >
               {filteredInstructors.map((inst) => (
                 <tr
                   key={inst.userDto.id}
-                  // تم تغيير تظليل الصف عند المرور إلى الأخضر الفاتح
-                  className="hover:bg-green-50 transition duration-150 ease-in-out cursor-pointer"
+                  className={`${tableRowHoverClass} transition duration-150 ease-in-out cursor-pointer`}
                   onClick={() => setSelected(inst)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap font-medium ${
+                      isDark ? "text-gray-100" : "text-gray-900"
+                    }`}
+                  >
                     {inst.userDto.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm hidden sm:table-cell ${
+                      isDark ? "text-slate-400" : "text-gray-500"
+                    }`}
+                  >
                     {inst.userDto.email}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm hidden md:table-cell ${
+                      isDark ? "text-slate-400" : "text-gray-500"
+                    }`}
+                  >
                     {inst.instructorTitle}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex space-x-2 space-x-reverse">
@@ -1290,8 +1435,7 @@ const InstructorsPage: React.FC = () => {
                         setSelected(inst);
                       }}
                       title="تعديل/عرض التفاصيل"
-                      // تم تغيير لون الأيقونة إلى الأزرق واستخدام خلفية خفيفة بالأخضر
-                      className="text-blue-600 hover:text-blue-800 transition p-1 bg-green-100 rounded-full"
+                      className="text-emerald-600 hover:text-emerald-800 transition p-1 bg-emerald-100 rounded-full"
                     >
                       <Edit size={18} />
                     </button>
@@ -1313,7 +1457,7 @@ const InstructorsPage: React.FC = () => {
         </div>
       ) : (
         !isLoading && (
-          <p className="text-gray-500 text-center py-10 text-lg">
+          <p className={`text-center py-10 text-lg ${secondaryTextClass}`}>
             {searchTerm
               ? "لا توجد نتائج بحث مطابقة."
               : "لا توجد بيانات محاضرين لعرضها."}
