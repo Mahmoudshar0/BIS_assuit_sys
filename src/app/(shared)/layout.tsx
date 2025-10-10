@@ -30,7 +30,7 @@ export default function SharedDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { theme } = useContext(ThemeContext); // جلب الثيم
+  const { theme } = useContext(ThemeContext);
   const pathname = usePathname();
   const [isUsersOpen, setIsUsersOpen] = useState(pathname.startsWith("/users"));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
