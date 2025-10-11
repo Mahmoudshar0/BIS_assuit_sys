@@ -11,15 +11,11 @@ export default function OverviewPage() {
         <div className="bg-white p-6 rounded-xl shadow-lg border-r-4 border-indigo-500">
           <p className="text-sm text-gray-500">إجمالي الطلاب</p>
           <p className="text-4xl font-bold text-indigo-700 mt-1">4,210</p>
-          <p className="text-xs text-green-500 mt-2">
-            زيادة 5% عن الشهر الماضي
-          </p>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-lg border-r-4 border-sky-500">
           <p className="text-sm text-gray-500">المقررات النشطة</p>
           <p className="text-4xl font-bold text-sky-700 mt-1">45</p>
-          <p className="text-xs text-yellow-500 mt-2">3 مقررات تحتاج تحديث</p>
         </div>
 
         {/* بطاقة إحصائية 3: المحاضرون */}

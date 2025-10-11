@@ -56,7 +56,7 @@ export default function SharedDashboardLayout({
         { href: "/users/managers", label: "أعضاء الإدارة", icon: Users },
       ],
     },
-    { href: "/reports", label: "التقارير", icon: BarChart3 },
+    // { href: "/reports", label: "التقارير", icon: BarChart3 },
     { href: "/settings", label: "الإعدادات", icon: Settings },
   ];
 

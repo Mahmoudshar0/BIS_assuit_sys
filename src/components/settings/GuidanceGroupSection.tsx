@@ -223,7 +223,7 @@ export default function GuidanceGroupSection() {
 
               <div>
                 <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
-                  المستوى (En Level)
+                  المستوى
                 </label>
                 <select
                   value={enLevel}
