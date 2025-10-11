@@ -1,23 +1,30 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Plus, Loader2, Edit, Trash } from "lucide-react";
 
+interface GuidanceGroup {
+  id: number;
+  groupName: string;
+  enLevel: number;
+  levelName?: string;
+}
+
 export default function GuidanceGroupSection() {
-  const [groups, setGroups] = useState<any[]>([]);
+  const [groups, setGroups] = useState<GuidanceGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<any | null>(null);
+  const [editingGroup, setEditingGroup] = useState<GuidanceGroup | null>(null);
   const [groupName, setGroupName] = useState("");
   const [enLevel, setEnLevel] = useState<number>(1);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`${apiUrl}/GuidanceGroup`);
       if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-      const data = await res.json();
+      const data: GuidanceGroup[] = await res.json();
       setGroups(data);
     } catch (err) {
       console.error("Error fetching groups:", err);
@@ -25,11 +32,11 @@ export default function GuidanceGroupSection() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl]);
 
   useEffect(() => {
     fetchGroups();
-  }, []);
+  }, [fetchGroups]);
 
   const handleSave = async () => {
     try {
@@ -37,19 +44,16 @@ export default function GuidanceGroupSection() {
 
       const isEdit = Boolean(editingGroup);
       const url = isEdit
-        ? `${apiUrl}/GuidanceGroup/${editingGroup.id}`
+        ? `${apiUrl}/GuidanceGroup/${editingGroup?.id}`
         : `${apiUrl}/GuidanceGroup`;
-      const bodyObj = isEdit
-        ? { id: editingGroup.id, groupName, enLevel }
-        : { groupName, enLevel };
 
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
+      const bodyObj = isEdit
+        ? { id: editingGroup?.id, groupName, enLevel }
+        : { groupName, enLevel };
 
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyObj),
       });
 
@@ -84,11 +88,12 @@ export default function GuidanceGroupSection() {
     if (!confirm("هل أنت متأكد من الحذف؟")) return;
     try {
       setLoading(true);
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const res = await fetch(`${apiUrl}/GuidanceGroup/${id}`, {
@@ -112,11 +117,11 @@ export default function GuidanceGroupSection() {
     }
   };
 
-  const openDialog = (group?: any) => {
+  const openDialog = (group?: GuidanceGroup) => {
     if (group) {
       setEditingGroup(group);
-      setGroupName(group.groupName ?? "");
-      setEnLevel(group.enLevel ?? 1);
+      setGroupName(group.groupName);
+      setEnLevel(group.enLevel);
     } else {
       setEditingGroup(null);
       setGroupName("");
@@ -171,7 +176,7 @@ export default function GuidanceGroupSection() {
                     {g.groupName}
                   </td>
                   <td className="p-3 border dark:border-gray-700">
-                    {g.levelName ?? g.enLevel}
+                    {g.levelName ?? `Level ${g.enLevel}`}
                   </td>
                   <td className="p-3 border dark:border-gray-700 flex gap-3 justify-center">
                     <button
@@ -225,10 +230,11 @@ export default function GuidanceGroupSection() {
                   onChange={(e) => setEnLevel(Number(e.target.value))}
                   className="w-full border rounded-lg px-3 py-2 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 >
-                  <option value={1}>Level 1</option>
-                  <option value={2}>Level 2</option>
-                  <option value={3}>Level 3</option>
-                  <option value={4}>Level 4</option>
+                  {[1, 2, 3, 4].map((lvl) => (
+                    <option key={lvl} value={lvl}>
+                      Level {lvl}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

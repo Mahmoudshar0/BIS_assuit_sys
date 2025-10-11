@@ -1,23 +1,30 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Plus, Loader2, Edit, Trash } from "lucide-react";
 
+interface AcademicYear {
+  id: number;
+  startDate: string;
+  endDate: string;
+  label?: string;
+}
+
 export default function AcademicYearSection() {
-  const [years, setYears] = useState<any[]>([]);
+  const [years, setYears] = useState<AcademicYear[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingYear, setEditingYear] = useState<any | null>(null);
+  const [editingYear, setEditingYear] = useState<AcademicYear | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchYears = async () => {
+  const fetchYears = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`${apiUrl}/AcademicYear`);
       if (!res.ok) throw new Error("Failed to fetch academic years");
-      const data = await res.json();
+      const data: AcademicYear[] = await res.json();
       console.log("✅ Fetched years:", data);
       setYears(data);
     } catch (err) {
@@ -25,11 +32,11 @@ export default function AcademicYearSection() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl]);
 
   useEffect(() => {
     fetchYears();
-  }, []);
+  }, [fetchYears]);
 
   const handleSave = async () => {
     try {
@@ -38,9 +45,7 @@ export default function AcademicYearSection() {
         ? `${apiUrl}/AcademicYear/${editingYear.id}`
         : `${apiUrl}/AcademicYear`;
 
-      const isEdit = Boolean(editingYear);
-
-      const bodyObj = isEdit
+      const bodyObj = editingYear
         ? { id: editingYear.id, startDate, endDate }
         : { startDate, endDate };
 
@@ -75,7 +80,7 @@ export default function AcademicYearSection() {
     }
   };
 
-  const openDialog = (year?: any) => {
+  const openDialog = (year?: AcademicYear) => {
     if (year) {
       setEditingYear(year);
       setStartDate(year.startDate.slice(0, 10));
@@ -133,7 +138,9 @@ export default function AcademicYearSection() {
                   className="hover:bg-gray-50 dark:hover:bg-gray-800 transition border-b text-gray-800 dark:text-gray-100"
                 >
                   <td className="p-3 border dark:border-gray-700">{i + 1}</td>
-                  <td className="p-3 border dark:border-gray-700">{y.label}</td>
+                  <td className="p-3 border dark:border-gray-700">
+                    {y.label ?? `سنة ${i + 1}`}
+                  </td>
                   <td className="p-3 border dark:border-gray-700">
                     {y.startDate.slice(0, 10)}
                   </td>
