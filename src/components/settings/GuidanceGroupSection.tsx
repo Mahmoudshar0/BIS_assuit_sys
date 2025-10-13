@@ -9,7 +9,9 @@ interface GuidanceGroup {
   groupName: string;
   enLevel: number;
 }
-
+type GuidanceGroupPayload = Omit<GuidanceGroup, "id"> & {
+  id?: number;
+};
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function GuidanceGroupSection() {
@@ -49,7 +51,7 @@ export default function GuidanceGroupSection() {
         : `${apiUrl}/GuidanceGroup`;
       const method = isEdit ? "PUT" : "POST";
 
-      const payload: any = {
+      const payload: GuidanceGroupPayload = {
         groupName: groupName.trim(),
         enLevel: enLevel,
       };

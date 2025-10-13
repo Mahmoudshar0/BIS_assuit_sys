@@ -18,6 +18,10 @@ export default function AcademicYearSection() {
   const [editingYear, setEditingYear] = useState<AcademicYear | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  type AcademicYearPayload = Omit<AcademicYear, "id" | "label"> & {
+    id?: number;
+  };
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const fetchYears = useCallback(async () => {
@@ -59,12 +63,11 @@ export default function AcademicYearSection() {
         ? `${apiUrl}/AcademicYear/${editingYear!.id}`
         : `${apiUrl}/AcademicYear`;
 
-      const payload: any = {
+      const payload: AcademicYearPayload = {
         startDate,
         endDate,
       };
 
-      // ✅ نضيف الـ id بس في حالة التعديل
       if (isEdit) payload.id = editingYear!.id;
 
       const res = await fetch(url, {

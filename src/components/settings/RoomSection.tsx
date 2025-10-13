@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit, Save, X, Search, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit, Save, Search, Loader2 } from "lucide-react";
 
 interface Room {
   id: number;
@@ -10,6 +10,10 @@ interface Room {
   capacity: number;
   location: string;
 }
+
+type RoomPayload = Omit<Room, "id"> & {
+  id?: number;
+};
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -99,7 +103,7 @@ export default function RoomSection() {
         : `${apiUrl}/Room`;
       const method = isEdit ? "PUT" : "POST";
 
-      const payload: any = {
+      const payload: RoomPayload = {
         name: formData.name.trim(),
         capacity: capacityValue,
         location: formData.location.trim(),
