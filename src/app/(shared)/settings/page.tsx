@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ThemeProvider } from "@/context/ThemeContext";
 import AcademicYearSection from "@/components/settings/AcademicYearSection";
 import GuidanceGroupSection from "@/components/settings/GuidanceGroupSection";
+import RoomSection from "@/components/settings/RoomSection";
 
 export default function SettingsPage() {
   return (
@@ -16,6 +17,7 @@ export default function SettingsPage() {
           </h1>
         </div>
 
+        {/* إدارة السنوات الدراسية */}
         <Card className="shadow-md dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 mb-8">
           <CardHeader>
             <CardTitle>إدارة السنوات الدراسية</CardTitle>
@@ -25,12 +27,23 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
+        {/* إدارة مجموعات الإرشاد */}
+        <Card className="shadow-md dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 mb-8">
           <CardHeader>
             <CardTitle>إدارة مجموعات الإرشاد</CardTitle>
           </CardHeader>
           <CardContent>
             <GuidanceGroupSection />
+          </CardContent>
+        </Card>
+
+        {/* إدارة القاعات */}
+        <Card className="shadow-md dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
+          <CardHeader>
+            <CardTitle>إدارة القاعات (Room)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RoomSection />
           </CardContent>
         </Card>
       </div>
