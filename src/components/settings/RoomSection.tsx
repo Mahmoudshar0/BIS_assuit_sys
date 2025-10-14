@@ -213,7 +213,7 @@ export default function RoomSection() {
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <thead className="bg-emerald-600 text-white">
-              <tr className="text-right text-gray-600 dark:text-gray-300">
+              <tr className="text-right text-white">
                 <th className="p-3 font-semibold text-center w-1/12">الرقم</th>
                 <th className="p-3 font-semibold w-4/12">اسم القاعة</th>
                 <th className="p-3 font-semibold w-2/12">السعة</th>

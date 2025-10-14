@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import AcademicYearSection from "@/components/settings/AcademicYearSection";
 import GuidanceGroupSection from "@/components/settings/GuidanceGroupSection";
 import RoomSection from "@/components/settings/RoomSection";
+import SemesterSection from "@/components/settings/SemesterSection";
 
 export default function SettingsPage() {
   return (
@@ -44,6 +45,16 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <RoomSection />
+          </CardContent>
+        </Card>
+
+        {/*إدارة الفصل الدراسي*/}
+        <Card className="shadow-md dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 mt-8">
+          <CardHeader>
+            <CardTitle>إدارة الفصل الدراسي</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SemesterSection />
           </CardContent>
         </Card>
       </div>
