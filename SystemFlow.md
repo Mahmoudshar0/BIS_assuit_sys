@@ -1,6 +1,6 @@
 # Academic Attendance Management System — User Roles & Permissions
 
-🎯 System User Flow (English Version)
+ System User Flow (English Version)
 1. Student
 
 View personal attendance records.
@@ -73,4 +73,4 @@ Additionally, can edit any data or override lower-level user actions.
 | **Reports Page** | Attendance and registration analytics |
 | **Profile Page** | Personal info for each user role |
 
-**🧾 Estimated Total:** ~9–10 main pages (some shared, some role-specific)
+**🧾 Estimated Total:** ~12–15 main pages (some shared, some role-specific)
