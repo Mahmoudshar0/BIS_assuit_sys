@@ -1,31 +1,42 @@
-export interface UserDto {
-  id?: number;
+export interface StudentUserInput {
+  id?: number | null;
+  name: string;
+  email: string;
+  password?: string;
+  confirmPassword?: string;
+  phone: string;
+  nationalNo: string;
+  profileImage?: string;
+  roleId: number | "";
+}
+
+export interface StudentInput {
+  id?: number | null;
+  gpa: number | "";
+  enrollmentDate: string;
+  studentLevel: number | "";
+  guidanceGroupID: number | "";
+  user: StudentUserInput;
+}
+
+export interface StudentUserPayload {
+  id: number;
   name: string;
   email: string;
   phone: string;
   nationalNo: string;
-  profileImage?: string;
-  password?: string;
-  confirmPassword?: string;
-  roleId?: number; // من Dropdown الـ Roles
+  profileImage: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface Student {
+export interface StudentPayload {
   studentID: number;
   gpa: number;
   enrollmentDate: string;
   studentLevel: number;
   guidanceGroupID: number;
-  user: UserDto;
-}
-
-export interface StudentPayload {
-  studentID?: number;
-  gpa: number;
-  enrollmentDate: string;
-  studentLevel: number;
-  guidanceGroupID: number;
-  user: UserDto;
+  user: StudentUserPayload;
 }
 
 export const apiUrl = process.env.NEXT_PUBLIC_API_URL;
