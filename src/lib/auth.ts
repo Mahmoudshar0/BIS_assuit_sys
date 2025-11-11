@@ -8,7 +8,7 @@ import {
     ApiResponse 
 } from '@/types/auth'; 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net';
 
 function decodeJwt(token: string): UserClaims | null {
   try {
@@ -41,10 +41,6 @@ function decodeJwt(token: string): UserClaims | null {
 
 
 export async function login(credentials: LoginCredentials): Promise<UserClaims> {
-  if (!API_URL) {
-    throw new Error('API URL is not defined in environment variables.');
-  }
-
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',

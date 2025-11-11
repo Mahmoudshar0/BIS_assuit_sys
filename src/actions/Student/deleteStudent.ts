@@ -1,13 +1,20 @@
-import { apiUrl } from "./types";
+import { getAuthHeaders, getApiUrl } from "@/lib/api";
 
-export async function deleteStudent(id: number): Promise<string> {
-  // TODO: Confirm DELETE endpoint structure
-  const res = await fetch(`${apiUrl}/Students/${id}`, {
+export async function deleteStudent(studentID: number): Promise<void> {
+  const apiUrl = getApiUrl();
+
+  const res = await fetch(`${apiUrl}/api/Students?studentID=${studentID}`, {
     method: "DELETE",
+    headers: getAuthHeaders(),
   });
 
-  const text = await res.text();
-  if (!res.ok) throw new Error(text || "Failed to delete student");
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to delete student");
+  }
 
-  return text;
+  // DELETE returns 204 No Content
+  if (res.status !== 204) {
+    throw new Error(`Unexpected status code: ${res.status}`);
+  }
 }
