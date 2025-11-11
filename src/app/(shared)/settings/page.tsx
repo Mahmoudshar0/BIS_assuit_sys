@@ -7,6 +7,7 @@ import AcademicYearSection from "@/components/settings/AcademicYearSection";
 import GuidanceGroupSection from "@/components/settings/GuidanceGroupSection";
 import RoomSection from "@/components/settings/RoomSection";
 import SemesterSection from "@/components/settings/SemesterSection";
+import CourseSection from "@/components/settings/courseSection";
 
 export default function SettingsPage() {
   return (
@@ -55,6 +56,15 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <SemesterSection />
+          </CardContent>
+        </Card>
+        {/*إدارة المقررات الدراسية*/}
+        <Card className="shadow-md dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-700 mt-8">
+          <CardHeader>
+            <CardTitle>إدارة المقررات الدراسية</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CourseSection />
           </CardContent>
         </Card>
       </div>

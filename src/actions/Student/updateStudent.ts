@@ -4,7 +4,7 @@ import { getAuthHeaders, getApiUrl } from "@/lib/api";
 export async function updateStudent(payload: StudentPayload): Promise<void> {
   const apiUrl = getApiUrl();
 
-  const res = await fetch(`${apiUrl}/api/Students`, {
+  const res = await fetch(`${apiUrl}/Students`, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify(payload),

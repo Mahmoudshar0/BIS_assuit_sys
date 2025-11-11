@@ -3,7 +3,7 @@ import { getAuthHeaders, getApiUrl } from "@/lib/api";
 export async function deleteStudent(studentID: number): Promise<void> {
   const apiUrl = getApiUrl();
 
-  const res = await fetch(`${apiUrl}/api/Students?studentID=${studentID}`, {
+  const res = await fetch(`${apiUrl}/Students?studentID=${studentID}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
