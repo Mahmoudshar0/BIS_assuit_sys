@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchStudents } from "@/actions/Student/fetchStudents";
+import { addStudentsUsingFile } from "@/actions/Student/addStudentsUsingFile";
 import { deleteStudent } from "@/actions/Student/deleteStudent";
 import { addStudent } from "@/actions/Student/addStudent";
 import { updateStudent } from "@/actions/Student/updateStudent";
@@ -13,8 +14,12 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     loadStudents();
@@ -26,6 +31,7 @@ export default function StudentsPage() {
       setError(null);
       const data = await fetchStudents();
       setStudents(data);
+      console.log("Fetched students:", data);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "فشل تحميل بيانات الطلاب";
@@ -37,23 +43,31 @@ export default function StudentsPage() {
   };
 
   const handleDelete = async (studentID: number) => {
-    if (!confirm("هل أنت متأكد من حذف هذا الطالب؟")) {
-      return;
-    }
-
     try {
       setDeletingId(studentID);
       await deleteStudent(studentID);
-      // Remove the student from the list
-      setStudents(students.filter((s) => s.studentID !== studentID));
+      setStudents((prev) => prev.filter((s) => s.studentID !== studentID));
+      setDeleteError(null);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "فشل حذف الطالب";
-      alert(errorMessage);
-      console.error("Error deleting student:", err);
+      setDeleteError(errorMessage);
+      setTimeout(() => setDeleteError(null), 4000);
     } finally {
       setDeletingId(null);
+      setShowDeleteModal(false);
+      setStudentToDelete(null);
     }
+  };
+
+  const openDeleteModal = (studentID: number) => {
+    setStudentToDelete(studentID);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setStudentToDelete(null);
   };
 
   const handleAddStudent = () => {
@@ -104,6 +118,33 @@ export default function StudentsPage() {
     return levels[level] || `الفرقة ${level}`;
   };
 
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    // Only accept Excel files
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+      setUploadMessage("يرجى اختيار ملف Excel بصيغة xlsx أو xls فقط.");
+      setTimeout(() => setUploadMessage(null), 4000);
+      return;
+    }
+    try {
+      setLoading(true);
+      setError(null);
+      await addStudentsUsingFile(file);
+      await loadStudents();
+      setUploadMessage("تم رفع الملف بنجاح!");
+      setTimeout(() => setUploadMessage(null), 4000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "فشل رفع الملف";
+      setUploadMessage(errorMessage);
+      setTimeout(() => setUploadMessage(null), 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full text-gray-900 dark:text-gray-100">
       <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-2">
@@ -127,12 +168,41 @@ export default function StudentsPage() {
           >
             + إضافة طالب جديد
           </button>
+          <label
+            htmlFor="file-upload"
+            className="max-w-[200px] bg-indigo-600 text-white py-2 px-3 rounded-lg font-semibold shadow-md hover:bg-indigo-700 transition duration-200 cursor-pointer flex items-center justify-center"
+          >
+            تحميل ملف طلاب
+            <input
+              id="file-upload"
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </label>
         </div>
       </div>
 
       {error && (
         <div className="mb-4 p-3 text-sm font-medium text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900 rounded-lg text-center">
           {error}
+        </div>
+      )}
+      {uploadMessage && (
+        <div
+          className={`mb-4 p-3 text-sm font-medium text-center rounded-lg ${
+            uploadMessage.includes("نجاح")
+              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+          }`}
+        >
+          {uploadMessage}
+        </div>
+      )}
+      {deleteError && (
+        <div className="mb-4 p-3 text-sm font-medium text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900 rounded-lg text-center">
+          {deleteError}
         </div>
       )}
 
@@ -190,7 +260,7 @@ export default function StudentsPage() {
                     {getLevelText(student.studentLevel)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                    {student.gpa.toFixed(2)}
+                    {student.gpa?.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                     <button
@@ -200,9 +270,9 @@ export default function StudentsPage() {
                       تعديل
                     </button>
                     <button
-                      onClick={() => handleDelete(student.studentID)}
+                      onClick={() => openDeleteModal(student.studentID)}
                       disabled={deletingId === student.studentID}
-                      className={`text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 ${
+                      className={`text-red-600 w-[130px] dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 ${
                         deletingId === student.studentID
                           ? "opacity-50 cursor-not-allowed"
                           : ""
@@ -212,6 +282,39 @@ export default function StudentsPage() {
                         ? "جاري الحذف..."
                         : "حذف"}
                     </button>
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                      <div className="fixed inset-0 bg-[rgba(0,0,0,0.2)] flex items-center justify-center z-50">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+                          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white text-center">
+                            تأكيد حذف الطالب
+                          </h3>
+                          <p className="mb-6 text-gray-700 dark:text-gray-300 text-center">
+                            هل أنت متأكد أنك تريد حذف هذا الطالب؟ لا يمكن
+                            التراجع عن هذا الإجراء.
+                          </p>
+                          <div className="flex justify-center gap-4">
+                            <button
+                              onClick={closeDeleteModal}
+                              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold"
+                            >
+                              إلغاء
+                            </button>
+                            <button
+                              onClick={() =>
+                                studentToDelete && handleDelete(studentToDelete)
+                              }
+                              className="bg-red-600 w-[130px] max-w-[130px] hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200"
+                              disabled={deletingId === studentToDelete}
+                            >
+                              {deletingId === studentToDelete
+                                ? "جاري الحذف..."
+                                : "تأكيد الحذف"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

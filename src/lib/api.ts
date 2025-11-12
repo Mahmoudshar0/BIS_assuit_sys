@@ -24,6 +24,6 @@ export function getAuthHeaders(): HeadersInit {
  * @returns API base URL
  */
 export function getApiUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net';
+  return process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net/api';
 }
 

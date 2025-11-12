@@ -66,7 +66,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4">
+        <h2 className="text-2xl font-bold mb-4 text-black">
           {student ? "تعديل بيانات الطالب" : "إضافة طالب جديد"}
         </h2>
 
@@ -87,7 +87,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="studentID"
                 value={formData.studentID}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
                 required
                 disabled={!!student}
               />
@@ -102,7 +102,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="user.name"
                 value={formData.user.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -116,7 +116,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="user.email"
                 value={formData.user.email}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -130,7 +130,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="user.phone"
                 value={formData.user.phone}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -144,7 +144,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="user.nationalNo"
                 value={formData.user.nationalNo}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -157,7 +157,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="studentLevel"
                 value={formData.studentLevel}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
                 <option value={1}>الفرقة الأولى</option>
@@ -179,7 +179,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="gpa"
                 value={formData.gpa}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -193,7 +193,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="guidanceGroupID"
                 value={formData.guidanceGroupID}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black  w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>

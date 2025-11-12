@@ -39,4 +39,4 @@ export interface StudentPayload {
   user: StudentUserPayload;
 }
 
-export const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net';
+export const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net/api';
