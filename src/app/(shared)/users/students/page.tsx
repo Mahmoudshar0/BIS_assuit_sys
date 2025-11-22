@@ -107,15 +107,14 @@ export default function StudentsPage() {
     setEditingStudent(null);
   };
 
-  const getLevelText = (level: number): string => {
-    const levels = [
-      "",
-      "الفرقة الأولى",
-      "الفرقة الثانية",
-      "الفرقة الثالثة",
-      "الفرقة الرابعة",
-    ];
-    return levels[level] || `الفرقة ${level}`;
+  const getLevelText = (level: string): string => {
+    const levels: { [key: string]: string } = {
+      الاول: "الفرقة الأولى",
+      الثانى: "الفرقة الثانية",
+      الثالث: "الفرقة الثالثة",
+      الرابع: "الفرقة الرابعة",
+    };
+    return levels[level] || level;
   };
 
   const handleFileUpload = async (
@@ -326,7 +325,7 @@ export default function StudentsPage() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-700 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-700 rounded-lg p-6 max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 {editingStudent ? "تعديل بيانات الطالب" : "إضافة طالب جديد"}

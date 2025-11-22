@@ -9,19 +9,33 @@ interface StudentFormProps {
   onCancel: () => void;
 }
 
-export default function StudentForm({ student, onSubmit, onCancel }: StudentFormProps) {
+export default function StudentForm({
+  student,
+  onSubmit,
+  onCancel,
+}: StudentFormProps) {
   const [formData, setFormData] = useState<StudentPayload>({
     studentID: student?.studentID || 0,
     gpa: student?.gpa || 0,
-    studentLevel: student?.studentLevel || 1,
+    enrollmentDate:
+      student?.enrollmentDate || new Date().toISOString().split("T")[0],
+    studentLevel: student?.studentLevel || "الاول",
+    totalGrades: student?.totalGrades || 0,
+    sittingNumber: student?.sittingNumber || "",
+    parentPhone: student?.parentPhone || "",
+    address: student?.address || "",
+    notes: student?.notes || "",
     guidanceGroupID: student?.guidanceGroupID || 1,
     user: {
       id: student?.user.id || 0,
       name: student?.user.name || "",
       email: student?.user.email || "",
+      password: "",
+      confirmPassword: "",
       phone: student?.user.phone || "",
       nationalNo: student?.user.nationalNo || "",
-    }
+      roleId: 1,
+    },
   });
 
   const [loading, setLoading] = useState(false);
@@ -35,37 +49,55 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
     try {
       await onSubmit(formData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حدث خطأ أثناء حفظ البيانات");
+      setError(
+        err instanceof Error ? err.message : "حدث خطأ أثناء حفظ البيانات"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    
+
     if (name.startsWith("user.")) {
       const userField = name.split(".")[1];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         user: {
           ...prev.user,
-          [userField]: value
-        }
+          [userField]: value,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: name === "gpa" || name === "studentLevel" || name === "guidanceGroupID" || name === "studentID" 
-          ? Number(value) 
-          : value
+        [name]:
+          name === "gpa" ||
+          name === "totalGrades" ||
+          name === "guidanceGroupID" ||
+          name === "studentID"
+            ? Number(value)
+            : value,
       }));
     }
   };
 
+  const validatePhone = (phone: string) => {
+    return /^01[0-2,5]{1}[0-9]{8}$/.test(phone);
+  };
+
+  const validateParentPhone = (phone: string) => {
+    return /^[0-9]{11}$/.test(phone);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-6 w-full  max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-4 text-black">
           {student ? "تعديل بيانات الطالب" : "إضافة طالب جديد"}
         </h2>
@@ -78,21 +110,6 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                الرقم الجامعي
-              </label>
-              <input
-                type="number"
-                name="studentID"
-                value={formData.studentID}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
-                required
-                disabled={!!student}
-              />
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 الاسم الكامل
@@ -123,6 +140,34 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                كلمة المرور
+              </label>
+              <input
+                type="password"
+                name="user.password"
+                value={formData.user.password}
+                onChange={handleInputChange}
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required={!student}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                تأكيد كلمة المرور{" "}
+              </label>
+              <input
+                type="password"
+                name="user.confirmPassword"
+                value={formData.user.confirmPassword}
+                onChange={handleInputChange}
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required={!student}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 رقم الهاتف
               </label>
               <input
@@ -130,9 +175,14 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="user.phone"
                 value={formData.user.phone}
                 onChange={handleInputChange}
+                pattern="^01[0-2,5]{1}[0-9]{8}$"
+                placeholder="01xxxxxxxxx"
                 className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
+              {formData.user.phone && !validatePhone(formData.user.phone) && (
+                <p className="text-xs text-red-600 mt-1">رقم هاتف غير صحيح</p>
+              )}
             </div>
 
             <div>
@@ -143,6 +193,40 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 type="text"
                 name="user.nationalNo"
                 value={formData.user.nationalNo}
+                onChange={handleInputChange}
+                pattern="[0-9]{14}"
+                maxLength={14}
+                placeholder="14 رقم"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                رقم جلوس
+              </label>
+              <input
+                type="text"
+                name="sittingNumber"
+                value={formData.sittingNumber}
+                onChange={handleInputChange}
+                pattern="[0-9]{5}"
+                maxLength={5}
+                placeholder="5 أرقام"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                تاريخ التسجيل
+              </label>
+              <input
+                type="date"
+                name="enrollmentDate"
+                value={formData.enrollmentDate}
                 onChange={handleInputChange}
                 className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -160,16 +244,16 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               >
-                <option value={1}>الفرقة الأولى</option>
-                <option value={2}>الفرقة الثانية</option>
-                <option value={3}>الفرقة الثالثة</option>
-                <option value={4}>الفرقة الرابعة</option>
+                <option value="الاول">الأول</option>
+                <option value="الثانى">الثاني</option>
+                <option value="الثالث">الثالث</option>
+                <option value="الرابع">الرابع</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                المعدل التراكمي
+                المعدل التراكمي (GPA)
               </label>
               <input
                 type="number"
@@ -186,6 +270,43 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                مجموع الدرجات
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="4800"
+                name="totalGrades"
+                value={formData.totalGrades}
+                onChange={handleInputChange}
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                رقم هاتف ولي الأمر
+              </label>
+              <input
+                type="tel"
+                name="parentPhone"
+                value={formData.parentPhone}
+                onChange={handleInputChange}
+                pattern="[0-9]{11}"
+                maxLength={11}
+                placeholder="11 رقم"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+              {formData.parentPhone &&
+                !validateParentPhone(formData.parentPhone) && (
+                  <p className="text-xs text-red-600 mt-1">رقم هاتف غير صحيح</p>
+                )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 مجموعة الإرشاد
               </label>
               <input
@@ -193,8 +314,35 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
                 name="guidanceGroupID"
                 value={formData.guidanceGroupID}
                 onChange={handleInputChange}
-                className="text-black  w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                العنوان
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                ملاحظات
+              </label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows={3}
+                className="text-black w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -205,7 +353,7 @@ export default function StudentForm({ student, onSubmit, onCancel }: StudentForm
               disabled={loading}
               className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "جاري الحفظ..." : (student ? "تحديث" : "حفظ")}
+              {loading ? "جاري الحفظ..." : student ? "تحديث" : "حفظ"}
             </button>
             <button
               type="button"

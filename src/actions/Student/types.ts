@@ -14,7 +14,12 @@ export interface Student {
   studentID: number;
   gpa: number;
   enrollmentDate: string;
-  studentLevel: number;
+  studentLevel: string;
+  totalGrades: number;
+  sittingNumber: string;
+  parentPhone: string;
+  address: string;
+  notes: string;
   guidanceGroupID: number;
   user: StudentUser;
 }
@@ -28,15 +33,23 @@ export interface StudentUserPayload {
   confirmPassword?: string;
   phone: string;
   nationalNo: string;
+  roleId: number;
   profileImage?: string;
 }
 
 export interface StudentPayload {
   studentID: number;
   gpa: number;
-  studentLevel: number;
+  enrollmentDate: string;
+  studentLevel: string;
+  totalGrades: number;
+  sittingNumber: string;
+  parentPhone: string;
+  address: string;
+  notes: string;
   guidanceGroupID: number;
   user: StudentUserPayload;
 }
 
-export const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net/api';
+export const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL || "https://bis.runasp.net/api";
