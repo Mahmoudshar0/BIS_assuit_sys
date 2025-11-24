@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  Calendar,
 } from "lucide-react";
 import React, { useState, useEffect, useContext } from "react";
 import { usePathname } from "next/navigation";
@@ -57,6 +58,7 @@ export default function SharedDashboardLayout({
       ],
     },
     // { href: "/reports", label: "التقارير", icon: BarChart3 },
+    { href: "/schedule", label: "الجدول الدراسي", icon: Calendar },
     { href: "/settings", label: "الإعدادات", icon: Settings },
   ];
 
