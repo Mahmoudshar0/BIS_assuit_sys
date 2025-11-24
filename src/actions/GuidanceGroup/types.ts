@@ -2,6 +2,7 @@ export interface GuidanceGroup {
   id: number;
   groupName: string;
   enLevel: number;
+  groupNumber: number;
 }
 
 export type GuidanceGroupPayload = Omit<GuidanceGroup, "id"> & {
