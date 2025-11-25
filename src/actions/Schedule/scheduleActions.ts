@@ -21,6 +21,25 @@ export async function fetchSchedule(): Promise<SessionsScheduleDTO[]> {
   return res.json();
 }
 
+export async function fetchSessionById(sessionId: number): Promise<SessionsScheduleDTO> {
+  const apiUrl = getApiUrl();
+  const res = await fetch(`${apiUrl}/SessionsSchedule?sessionID=${sessionId}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error("Session not found");
+    }
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to fetch session");
+  }
+
+  return res.json();
+}
+
 export async function createSession(
   data: CreateSessionsScheduleDTO
 ): Promise<SessionsScheduleDTO> {
