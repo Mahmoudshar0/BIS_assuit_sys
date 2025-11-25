@@ -36,8 +36,10 @@ export default function SharedDashboardLayout({
   const [isUsersOpen, setIsUsersOpen] = useState(pathname.startsWith("/users"));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const handleResize = () => setIsMobile(window.innerWidth < 980);
     handleResize();
     window.addEventListener("resize", handleResize);

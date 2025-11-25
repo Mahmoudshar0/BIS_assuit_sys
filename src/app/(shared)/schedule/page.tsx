@@ -124,7 +124,7 @@ export default function SchedulePage() {
 
     loadSchedule();
   }, [selectedGroup, selectedSemester, selectedAcademicYear]);
-
+  console.log(sessions)
   const handleDelete = async (id: number) => {
     if (confirm("هل أنت متأكد من حذف هذه المحاضرة؟")) {
       try {
@@ -299,10 +299,10 @@ export default function SchedulePage() {
               <thead className="bg-gray-50 text-gray-700 font-semibold">
                 <tr>
                   <th className="p-4">اليوم</th>
-                  <th className="p-4">المادة (ID)</th>
+                  <th className="p-4">المادة </th>
                   <th className="p-4">النوع</th>
-                  <th className="p-4">القاعة (ID)</th>
-                  <th className="p-4">المجموعة (ID)</th>
+                  <th className="p-4">القاعة </th>
+                  <th className="p-4">المجموعة </th>
                   <th className="p-4">الوقت</th>
                   <th className="p-4 text-center">الإجراءات</th>
                 </tr>
@@ -323,7 +323,7 @@ export default function SchedulePage() {
                       <td className="p-4 font-medium text-gray-800">
                         {getDayName(session.day)}
                       </td>
-                      <td className="p-4 text-gray-600">{session.courseId}</td>
+                      <td className="p-4 text-gray-600">{session.courseName}</td>
                       <td className="p-4">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -337,12 +337,12 @@ export default function SchedulePage() {
                           {getSessionTypeName(session.sessionType)}
                         </span>
                       </td>
-                      <td className="p-4 text-gray-600">{session.roomId}</td>
+                      <td className="p-4 text-gray-600">{session.roomName}</td>
                       <td className="p-4 text-gray-600">
                         {session.guidanceGroupId}
                       </td>
                       <td className="p-4 text-gray-600" dir="ltr">
-                        {session.startTime} - {session.endTime}
+                        {session.startTime.slice(0,5)} - {session.endTime.slice(0,5)}
                       </td>
                       <td className="p-4 flex justify-center gap-2">
                         <Link

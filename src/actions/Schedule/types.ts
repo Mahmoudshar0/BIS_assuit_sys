@@ -2,7 +2,6 @@
 export enum EnSessionType {
   Lecture = 0,
   Section = 1,
-  Lab = 2,
 }
 
 export enum EnWeekDays {
@@ -19,8 +18,10 @@ export enum EnWeekDays {
 export interface SessionsScheduleDTO {
   sessionId: number;
   courseId: number;
+  courseName: string;
   sessionType: EnSessionType;
   roomId: number;
+  roomName: string;
   guidanceGroupId: number;
   day: EnWeekDays;
   startTime: string; // "time" format in Swagger usually maps to string "HH:mm:ss"

@@ -15,6 +15,12 @@ import { Course } from "@/actions/Course/types";
 import { fetchCoursesByLevel } from "@/actions/Course/fetchCoursesByLevel";
 import { GuidanceGroup } from "@/actions/GuidanceGroup/types";
 import { fetchGuidanceGroupsByLevel } from "@/actions/GuidanceGroup/fetchGuidanceGroupsByLevel";
+import { AcademicYear } from "@/actions/AcademicYear/types";
+import { fetchAcademicYears } from "@/actions/AcademicYear/fetchAcademicYears";
+import { Room } from "@/actions/Room/types";
+import { fetchRooms } from "@/actions/Room/fetchRooms";
+import { Semester } from "@/actions/semester/types";
+import { fetchSemesters } from "@/actions/semester/fetchSemesters";
 
 interface SessionFormProps {
   initialData?: CreateSessionsScheduleDTO & { sessionId?: number };
@@ -41,6 +47,15 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
   const [selectedGuidanceGroupFilter, setSelectedGuidanceGroupFilter] = useState<number>(0);
   const [courses, setCourses] = useState<Course[]>([]);
   const [guidanceGroups, setGuidanceGroups] = useState<GuidanceGroup[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+
+  // Disable form until both filters are selected (only in create mode)
+  // In edit mode, enable once initialData is present
+  const isFormDisabled = isEdit 
+    ? !initialData 
+    : (selectedLevel === 0 || selectedGuidanceGroupFilter === 0);
 
   useEffect(() => {
     const loadData = async () => {
@@ -58,6 +73,51 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
     };
     loadData();
   }, [selectedLevel]);
+  console.log(guidanceGroups)
+
+  // Fetch academic years, rooms, and semesters on mount
+  useEffect(() => {
+    const loadStaticData = async () => {
+      try {
+        const [yearsData, roomsData, semestersData] = await Promise.all([
+          fetchAcademicYears(),
+          fetchRooms(),
+          fetchSemesters(),
+        ]);
+        setAcademicYears(yearsData);
+        setRooms(roomsData);
+        setSemesters(semestersData);
+      } catch (error) {
+        console.error("Failed to load static data:", error);
+        toast.error("فشل تحميل البيانات الأساسية");
+      }
+    };
+    loadStaticData();
+  }, []);
+
+  // Set level and guidance group filter when editing (initialData provided)
+  useEffect(() => {
+    const initializeFilters = async () => {
+      if (initialData?.guidanceGroupId && initialData.guidanceGroupId > 0) {
+        try {
+          // Fetch all guidance groups to find the one matching initialData
+          const allLevels = [1, 2, 3, 4];
+          for (const level of allLevels) {
+            const groups = await fetchGuidanceGroupsByLevel(level);
+            const matchingGroup = groups.find(g => g.id === initialData.guidanceGroupId);
+            if (matchingGroup) {
+              setSelectedLevel(matchingGroup.enLevel);
+              setSelectedGuidanceGroupFilter(initialData.guidanceGroupId);
+              break;
+            }
+          }
+        } catch (error) {
+          console.error("Failed to initialize filters:", error);
+        }
+      }
+    };
+    initializeFilters();
+  }, [initialData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -77,11 +137,16 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
     setLoading(true);
 
     try {
+      const submissionData = {
+        ...formData,
+        guidanceGroupId: selectedGuidanceGroupFilter,
+      };
+
       if (isEdit && initialData?.sessionId) {
-        await updateSession({ ...formData, sessionId: initialData.sessionId });
+        await updateSession({ ...submissionData, sessionId: initialData.sessionId });
         toast.success("تم تحديث المحاضرة بنجاح");
       } else {
-        await createSession(formData);
+        await createSession(submissionData);
         toast.success("تم إضافة المحاضرة بنجاح");
       }
       router.push("/schedule");
@@ -128,7 +193,7 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
           {/* Guidance Group Filter */}
           <div>
             <label className="block text-sm font-semibold text-emerald-800 mb-2">
-              تصفية المجموعة
+              مجموعة الارشاد
             </label>
             <select
               value={selectedGuidanceGroupFilter}
@@ -137,14 +202,27 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
             >
               <option value={0}>جميع المجموعات</option>
               {guidanceGroups.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.groupName}
+                <option key={group.id} value={group.id} className="text-black">
+                  {group.groupNumber}
                 </option>
               ))}
             </select>
           </div>
         </div>
       </div>
+
+      {/* Info Message when form is disabled */}
+      {isFormDisabled && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <h4 className="font-semibold text-amber-900 mb-1">يرجى اختيار المستوى الدراسي ومجموعة التوجيه أولاً</h4>
+            {/* <p className="text-sm text-amber-800">يجب اختيار المستوى الدراسي ومجموعة التوجيه قبل ملء بيانات الجلسة</p> */}
+          </div>
+        </div>
+      )}
 
       {/* Main Form Fields */}
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
@@ -160,7 +238,8 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
             value={formData.courseId}
             onChange={handleChange}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
+            disabled={isFormDisabled}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <option value={0}>اختر المادة</option>
             {courses.map((course) => (
@@ -180,45 +259,63 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
             name="sessionType"
             value={formData.sessionType}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
+            disabled={isFormDisabled}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <option value={EnSessionType.Lecture}>محاضرة</option>
             <option value={EnSessionType.Section}>سكشن</option>
-            <option value={EnSessionType.Lab}>معمل</option>
           </select>
+          </div>
+        
+                  {/* Time Range */}
+        <div className="md:col-span-2 grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              وقت البدء
+            </label>
+            <input
+              type="time"
+              name="startTime"
+              value={formData.startTime}
+              onChange={handleChange}
+              required
+              disabled={isFormDisabled}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              وقت الانتهاء
+            </label>
+            <input
+              type="time"
+              name="endTime"
+              value={formData.endTime}
+              onChange={handleChange}
+              required
+              disabled={isFormDisabled}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+            />
+          </div>
         </div>
 
         {/* Room ID */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            رقم القاعة (Room ID)
+            اسم القاعة
           </label>
-          <input
-            type="number"
+          <select
             name="roomId"
             value={formData.roomId}
             onChange={handleChange}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
-          />
-        </div>
-
-        {/* Guidance Group ID */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            المجموعة (Group)
-          </label>
-          <select
-            name="guidanceGroupId"
-            value={formData.guidanceGroupId}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
+            disabled={isFormDisabled}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <option value={0}>اختر المجموعة</option>
-            {guidanceGroups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.groupName}
+            <option value={0}>اختر القاعة</option>
+            {rooms.map((room) => (
+              <option key={room.id} value={room.id}>
+                {room.name}
               </option>
             ))}
           </select>
@@ -233,7 +330,8 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
             name="day"
             value={formData.day}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
+            disabled={isFormDisabled}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <option value={EnWeekDays.Saturday}>السبت</option>
             <option value={EnWeekDays.Sunday}>الأحد</option>
@@ -248,61 +346,45 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
         {/* Academic Year ID */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            رقم السنة الدراسية (Year ID)
+            السنة الدراسية
           </label>
-          <input
-            type="number"
+          <select
             name="academiceYearId"
             value={formData.academiceYearId}
             onChange={handleChange}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
-          />
+            disabled={isFormDisabled}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <option value={0}>اختر السنة الدراسية</option>
+            {academicYears.map((year) => (
+              <option key={year.id} value={year.id}>
+                {year.label || `${year.startDate} - ${year.endDate}`}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Semester ID */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            رقم الفصل الدراسي (Semester ID)
+            الفصل الدراسي
           </label>
-          <input
-            type="number"
+          <select
             name="semesterId"
             value={formData.semesterId}
             onChange={handleChange}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
-          />
-        </div>
-
-        {/* Time Range */}
-        <div className="md:col-span-2 grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              وقت البدء
-            </label>
-            <input
-              type="time"
-              name="startTime"
-              value={formData.startTime}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              وقت الانتهاء
-            </label>
-            <input
-              type="time"
-              name="endTime"
-              value={formData.endTime}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black"
-            />
-          </div>
+            disabled={isFormDisabled}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-black disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <option value={0}>اختر الفصل الدراسي</option>
+            {semesters.map((semester) => (
+              <option key={semester.id} value={semester.id}>
+                الفصل {semester.semesterNumber} - {semester.academicYearLabel}
+              </option>
+            ))}
+          </select>
         </div>
         </div>
       </div>
@@ -317,7 +399,7 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
         </Link>
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || isFormDisabled}
           className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
