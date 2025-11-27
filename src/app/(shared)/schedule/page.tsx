@@ -16,7 +16,7 @@ import { fetchGuidanceGroupsByLevel } from "@/actions/GuidanceGroup/fetchGuidanc
 import { AcademicYear } from "@/actions/AcademicYear/types";
 import { fetchAcademicYears } from "@/actions/AcademicYear/fetchAcademicYears";
 import { Semester } from "@/actions/semester/types";
-import { Plus, Edit, Trash2, Calendar, Filter } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, Filter, UserCheck } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -345,6 +345,13 @@ export default function SchedulePage() {
                         {session.startTime.slice(0,5)} - {session.endTime.slice(0,5)}
                       </td>
                       <td className="p-4 flex justify-center gap-2">
+                        <Link
+                          href={`/schedule/attendance/${session.sessionId}`}
+                          className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                          title="اخذ الغياب"
+                        >
+                          <UserCheck size={18} />
+                        </Link>
                         <Link
                           href={`/schedule/edit/${session.sessionId}`}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
