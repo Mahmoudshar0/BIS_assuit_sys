@@ -5,22 +5,14 @@ import { useRouter } from "next/navigation";
 import { Save, ArrowRight, UserCheck, Calendar, Clock, MapPin, BookOpen, Users } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { fetchSessionById } from "@/actions/Schedule/scheduleActions";
+import { fetchSessionsScheduleById } from "@/actions/Schedule/scheduleActions";
+import { fetchSessionGroupByScheduleId } from "@/actions/SessionGroup/fetchSessionGroupByScheduleId";
+import { fetchStudentsByGroupId } from "@/actions/Student/fetchStudentsByGroupId";
+import { submitSessionAttendance } from "@/actions/Session/submitSessionAttendance";
 import { SessionsScheduleDTO, EnSessionType, EnWeekDays } from "@/actions/Schedule/types";
-
-// Mock data for students
-const MOCK_STUDENTS = [
-  { id: 1, name: "أحمد محمد علي" },
-  { id: 2, name: "سارة أحمد محمود" },
-  { id: 3, name: "محمد إبراهيم حسن" },
-  { id: 4, name: "فاطمة علي يوسف" },
-  { id: 5, name: "محمود حسن علي" },
-  { id: 6, name: "عمر خالد سعيد" },
-  { id: 7, name: "نور أحمد كمال" },
-  { id: 8, name: "يوسف محمد مصطفى" },
-  { id: 9, name: "ليلى حسن إبراهيم" },
-  { id: 10, name: "كريم علي محمود" },
-];
+import { Student } from "@/actions/Student/types";
+import { EnAttendanceStatus } from "@/actions/Session/types";
+import { SessionGroupDTO } from "@/actions/SessionGroup/types";
 
 type AttendanceStatus = "present" | "absent" | "late";
 
@@ -32,29 +24,46 @@ interface StudentAttendance {
 export default function AttendancePage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = React.use(params);
   const router = useRouter();
-  const [attendance, setAttendance] = useState<StudentAttendance[]>(
-    MOCK_STUDENTS.map((student) => ({
-      studentId: student.id,
-      status: "present", // Default to present
-    }))
-  );
+  const [students, setStudents] = useState<Student[]>([]);
+  const [attendance, setAttendance] = useState<StudentAttendance[]>([]);
   const [session, setSession] = useState<SessionsScheduleDTO | null>(null);
+  const [sessionGroup, setSessionGroup] = useState<SessionGroupDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const loadSession = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchSessionById(Number(sessionId));
-        setSession(data);
+        setLoading(true);
+        // 1. Fetch Session Details
+        const sessionData = await fetchSessionsScheduleById(Number(sessionId));
+        setSession(sessionData);
+
+        // 2. Fetch Session Group
+        const groupData = await fetchSessionGroupByScheduleId(Number(sessionId));
+        setSessionGroup(groupData);
+        
+        // 3. Fetch Students
+        if (groupData?.groupId) {
+          const studentsData = await fetchStudentsByGroupId(groupData.groupId);
+          setStudents(studentsData);
+          
+          // Initialize attendance
+          setAttendance(
+            studentsData.map((student) => ({
+              studentId: student.studentID,
+              status: "present",
+            }))
+          );
+        }
       } catch (error) {
-        console.error("Failed to load session:", error);
-        toast.error("فشل تحميل بيانات المحاضرة");
+        console.error("Failed to load data:", error);
+        toast.error("فشل تحميل البيانات");
       } finally {
         setLoading(false);
       }
     };
-    loadSession();
+    loadData();
   }, [sessionId]);
 
   const handleStatusChange = (studentId: number, status: AttendanceStatus) => {
@@ -66,14 +75,43 @@ export default function AttendancePage({ params }: { params: Promise<{ sessionId
   };
 
   const handleSave = async () => {
+    if (!session || !sessionGroup) return;
+
     setSaving(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    console.log("Saving attendance for session", sessionId, attendance);
-    toast.success("تم حفظ الغياب بنجاح");
-    setSaving(false);
-    router.push("/schedule");
+    try {
+      // Map status string to enum
+      const mapStatusToEnum = (status: AttendanceStatus) => {
+        switch (status) {
+          case "present": return EnAttendanceStatus.Present;
+          case "absent": return EnAttendanceStatus.Absent;
+          case "late": return EnAttendanceStatus.Late;
+          default: return EnAttendanceStatus.Absent;
+        }
+      };
+
+      const payload = {
+        sessionScheduleId: Number(sessionId),
+        roomId: session.roomId,
+        sessionGroupId: sessionGroup.groupId, // Using sessionGroup.groupId from state
+        date: new Date().toISOString().split('T')[0], // Current date YYYY-MM-DD
+        startTime: session.startTime,
+        endTime: session.endTime,
+        attendances: attendance.map(a => ({
+          studentId: a.studentId,
+          enStatus: mapStatusToEnum(a.status)
+        }))
+      };
+
+      await submitSessionAttendance(payload);
+      
+      toast.success("تم حفظ الغياب بنجاح");
+      router.push("/schedule");
+    } catch (error) {
+      console.error("Failed to save attendance:", error);
+      toast.error("فشل حفظ الغياب");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getDayName = (day: EnWeekDays) => {
@@ -198,37 +236,45 @@ export default function AttendancePage({ params }: { params: Promise<{ sessionId
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {MOCK_STUDENTS.map((student, index) => {
-                const studentStatus = attendance.find(
-                  (a) => a.studentId === student.id
-                )?.status;
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="p-8 text-center text-gray-500">
+                    لا يوجد طلاب في هذه المجموعة
+                  </td>
+                </tr>
+              ) : (
+                students.map((student, index) => {
+                  const studentStatus = attendance.find(
+                    (a) => a.studentId === student.studentID
+                  )?.status;
 
-                return (
-                  <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-4 md:text-xl text-gray-500">{index + 1}</td>
-                    <td className="p-4 font-medium md:text-xl text-gray-800">{student.name}</td>
-                    <td className="p-4">
-                      <select
-                        value={studentStatus}
-                        onChange={(e) =>
-                          handleStatusChange(student.id, e.target.value as AttendanceStatus)
-                        }
-                        className={`w-full md:text-xl p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
-                          studentStatus === "present"
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                            : studentStatus === "absent"
-                            ? "bg-red-50 border-red-200 text-red-700"
-                            : "bg-yellow-50 border-yellow-200 text-yellow-700"
-                        }`}
-                      >
-                        <option value="present">حاضر</option>
-                        <option value="absent">غائب</option>
-                        <option value="late">متأخر</option>
-                      </select>
-                    </td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={student.studentID} className="hover:bg-gray-50 transition-colors">
+                      <td className="p-4 md:text-xl text-gray-500">{index + 1}</td>
+                      <td className="p-4 font-medium md:text-xl text-gray-800">{student.user.name}</td>
+                      <td className="p-4">
+                        <select
+                          value={studentStatus}
+                          onChange={(e) =>
+                            handleStatusChange(student.studentID, e.target.value as AttendanceStatus)
+                          }
+                          className={`w-full md:text-xl p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${
+                            studentStatus === "present"
+                              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                              : studentStatus === "absent"
+                              ? "bg-red-50 border-red-200 text-red-700"
+                              : "bg-yellow-50 border-yellow-200 text-yellow-700"
+                          }`}
+                        >
+                          <option value="present">حاضر</option>
+                          <option value="absent">غائب</option>
+                          <option value="late">متأخر</option>
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

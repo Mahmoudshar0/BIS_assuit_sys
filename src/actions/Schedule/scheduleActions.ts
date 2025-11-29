@@ -21,7 +21,7 @@ export async function fetchSchedule(): Promise<SessionsScheduleDTO[]> {
   return res.json();
 }
 
-export async function fetchSessionById(sessionId: number): Promise<SessionsScheduleDTO> {
+export async function fetchSessionsScheduleById(sessionId: number): Promise<SessionsScheduleDTO> {
   const apiUrl = getApiUrl();
   const res = await fetch(`${apiUrl}/SessionsSchedule?sessionID=${sessionId}`, {
     method: "GET",

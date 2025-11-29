@@ -4,7 +4,8 @@ import { useEffect, useState, use } from "react";
 import SessionForm from "@/components/schedule/SessionForm";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { fetchSessionById } from "@/actions/Schedule/scheduleActions";
+import { fetchSessionsScheduleById } from "@/actions/Schedule/scheduleActions";
+import { fetchCourseLevel } from "@/actions/Course/fetchCourseLevel";
 import { SessionsScheduleDTO } from "@/actions/Schedule/types";
 import { toast } from "sonner";
 
@@ -15,13 +16,19 @@ export default function EditSessionPage({
 }) {
   const { id } = use(params);
   const [session, setSession] = useState<SessionsScheduleDTO | null>(null);
+  const [level, setLevel] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const sessionData = await fetchSessionById(Number(id));
+        const sessionData = await fetchSessionsScheduleById(Number(id));
         setSession(sessionData);
+
+        if (sessionData.courseId) {
+          const courseLevel = await fetchCourseLevel(sessionData.courseId);
+          setLevel(courseLevel);
+        }
       } catch (error) {
         console.error("Failed to load session:", error);
         toast.error("فشل تحميل بيانات المحاضرة");
@@ -74,7 +81,7 @@ export default function EditSessionPage({
         </div>
       </div>
 
-      <SessionForm initialData={session} isEdit />
+      <SessionForm initialData={session} initialLevel={level} isEdit />
     </div>
   );
 }

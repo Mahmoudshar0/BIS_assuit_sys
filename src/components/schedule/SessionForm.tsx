@@ -24,10 +24,11 @@ import { fetchSemesters } from "@/actions/semester/fetchSemesters";
 
 interface SessionFormProps {
   initialData?: CreateSessionsScheduleDTO & { sessionId?: number };
+  initialLevel?: number;
   isEdit?: boolean;
 }
 
-export default function SessionForm({ initialData, isEdit = false }: SessionFormProps) {
+export default function SessionForm({ initialData, initialLevel, isEdit = false }: SessionFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreateSessionsScheduleDTO>(
@@ -97,27 +98,13 @@ export default function SessionForm({ initialData, isEdit = false }: SessionForm
 
   // Set level and guidance group filter when editing (initialData provided)
   useEffect(() => {
-    const initializeFilters = async () => {
-      if (initialData?.guidanceGroupId && initialData.guidanceGroupId > 0) {
-        try {
-          // Fetch all guidance groups to find the one matching initialData
-          const allLevels = [1, 2, 3, 4];
-          for (const level of allLevels) {
-            const groups = await fetchGuidanceGroupsByLevel(level);
-            const matchingGroup = groups.find(g => g.id === initialData.guidanceGroupId);
-            if (matchingGroup) {
-              setSelectedLevel(matchingGroup.enLevel);
-              setSelectedGuidanceGroupFilter(initialData.guidanceGroupId);
-              break;
-            }
-          }
-        } catch (error) {
-          console.error("Failed to initialize filters:", error);
-        }
-      }
-    };
-    initializeFilters();
-  }, [initialData]);
+    if (initialLevel) {
+      setSelectedLevel(initialLevel);
+    }
+    if (initialData?.guidanceGroupId && initialData.guidanceGroupId > 0) {
+      setSelectedGuidanceGroupFilter(initialData.guidanceGroupId);
+    }
+  }, [initialData, initialLevel]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
