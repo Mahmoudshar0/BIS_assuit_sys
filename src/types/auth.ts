@@ -3,29 +3,29 @@ export interface LoginCredentials {
   password: string;
 }
 
+export type UserRole = 
+  | 'Student'
+  | 'SuperUser'
+  | 'Admin'
+  | 'StudentAffairsEmp'
+  | 'LevelRegister'
+  | 'GroupSupervisor'
+  | 'Instructor';
+
 export interface UserClaims {
   name: string; 
-  role: 'Admin' | 'Faculty' | 'Student'; 
+  role: UserRole; 
 }
 
-export interface AuthData {
+export interface AuthResponse {
   token: string;
   fullName: string;
-  role: 'Admin' | 'Faculty' | 'Student';
-}
-
-export interface SuccessResponse {
-  successed: true;
-  message: string;
-  errors: unknown[];
-  data: AuthData;
+  role: UserRole;
 }
 
 export interface ErrorResponse {
-  successed: false;
   message: string;
-  errors: unknown[];
-  data: null;
+  [key: string]: any;
 }
 
-export type ApiResponse = SuccessResponse | ErrorResponse;
+export type ApiResponse = AuthResponse | ErrorResponse;

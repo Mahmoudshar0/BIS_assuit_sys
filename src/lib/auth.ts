@@ -2,13 +2,13 @@
 
 import { 
     LoginCredentials, 
-    SuccessResponse, 
+    AuthResponse, 
     ErrorResponse, 
     UserClaims, 
     ApiResponse 
 } from '@/types/auth'; 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net/api';
 
 function decodeJwt(token: string): UserClaims | null {
   try {
@@ -42,22 +42,22 @@ function decodeJwt(token: string): UserClaims | null {
 
 export async function login(credentials: LoginCredentials): Promise<UserClaims> {
   try {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_URL}/auth/login-with-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
 
     const apiResponse: ApiResponse = await response.json(); 
-    
-    if (!response.ok || !apiResponse.successed) {
+
+    if (!response.ok) {
         const errorData = apiResponse as ErrorResponse; 
         throw new Error(errorData.message || 'فشل تسجيل الدخول بسبب خطأ في السيرفر.');
     }
 
-    const successData = apiResponse as SuccessResponse;
+    const successData = apiResponse as AuthResponse;
     
-    const token = successData.data.token; 
+    const token = successData.token; 
 
     if (!token || typeof token !== 'string') {
         throw new Error('تم تسجيل الدخول بنجاح، ولكن رمز المصادقة (Token) مفقود من استجابة السيرفر.');

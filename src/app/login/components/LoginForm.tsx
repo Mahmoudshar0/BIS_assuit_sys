@@ -30,7 +30,7 @@ export default function LoginForm() {
         case "Admin":
           router.push("/overview");
           break;
-        case "Faculty":
+        case "Instructor":
           router.push("/attendance");
           break;
         case "Student":
