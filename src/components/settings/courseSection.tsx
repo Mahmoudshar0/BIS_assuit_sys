@@ -180,10 +180,7 @@ export default function CourseSection() {
     );
   };
 
-  const getSemesterLabel = (semesterId: number) => {
-    const semester = semesters.find((s) => s.id === semesterId);
-    return semester ? `الفصل رقم ${semester.semesterNumber}` : `غير محدد`;
-  };
+
 
   return (
     <div

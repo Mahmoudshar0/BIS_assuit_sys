@@ -26,9 +26,9 @@ export default function StudentNotifications() {
 
         const data = await fetchNotificationsByUser(claims.id);
         setNotifications(data);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching notifications:", err);
-        setError(err.message || "Failed to load notifications");
+        setError(err instanceof Error ? err.message : "Failed to load notifications");
       } finally {
         setLoading(false);
       }

@@ -26,7 +26,7 @@ export interface AuthResponse {
 
 export interface ErrorResponse {
   message: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export type ApiResponse = AuthResponse | ErrorResponse;

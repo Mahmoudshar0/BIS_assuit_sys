@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   Settings,
-  BarChart3,
   LogOut,
   ChevronDown,
   Menu,
@@ -38,11 +37,10 @@ export default function SharedDashboardLayout({
   const [isUsersOpen, setIsUsersOpen] = useState(pathname.startsWith("/users"));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    // setMounted(true);
     const token = localStorage.getItem("authToken");
     if (token) {
       const claims = decodeJwt(token);
@@ -142,10 +140,12 @@ export default function SharedDashboardLayout({
             } p-6 flex justify-between items-center rounded-tl-2xl`}
           >
             <div className="flex items-center gap-3">
-              <img
+              <Image
                 src="/faculty-logo.png"
                 alt="Logo"
-                className="w-10 h-10 rounded-full shadow-md border border-white/50"
+                width={40}
+                height={40}
+                className="rounded-full shadow-md border border-white/50"
               />
               <h1 className="text-2xl font-bold tracking-wide">لوحة التحكم</h1>
               <ThemeSwitch />

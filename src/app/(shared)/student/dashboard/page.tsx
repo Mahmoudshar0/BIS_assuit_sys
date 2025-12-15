@@ -28,9 +28,9 @@ export default function StudentDashboard() {
         const data = await fetchStudentById(claims.id);
         setStudent(data);
         localStorage.setItem("student_data_cache", JSON.stringify(data));
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching student data:", err);
-        setError(err.message || "Failed to load data");
+        setError(err instanceof Error ? err.message : "Failed to load data");
       } finally {
         setLoading(false);
       }

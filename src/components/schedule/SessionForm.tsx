@@ -9,7 +9,7 @@ import {
 } from "@/actions/Schedule/types";
 import { createSession, updateSession } from "@/actions/Schedule/scheduleActions";
 import { toast } from "sonner";
-import { Save, ArrowRight } from "lucide-react";
+import { Save } from "lucide-react";
 import Link from "next/link";
 import { Course } from "@/actions/Course/types";
 import { fetchCoursesByLevel } from "@/actions/Course/fetchCoursesByLevel";

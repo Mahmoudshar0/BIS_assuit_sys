@@ -52,9 +52,9 @@ export default function StudentSchedule() {
         const scheduleData = await fetchScheduleByGuidanceGroup(guidanceGroupID);
         setSchedule(scheduleData);
 
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching schedule:", err);
-        setError(err.message || "Failed to load schedule");
+        setError(err instanceof Error ? err.message : "Failed to load schedule");
       } finally {
         setLoading(false);
       }

@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
-  SessionsScheduleDTO,
+  SessionsScheduleDTO,  
   EnSessionType,
   EnWeekDays,
 } from "@/actions/Schedule/types";
@@ -30,7 +29,6 @@ export default function SchedulePage() {
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [guidanceGroups, setGuidanceGroups] = useState<GuidanceGroup[]>([]);
-  const router = useRouter();
 
   // Load academic years on mount
   useEffect(() => {
@@ -75,7 +73,7 @@ export default function SchedulePage() {
         loadSemesters();
       }
     }
-  }, [selectedAcademicYear]);
+  }, [selectedAcademicYear, semesters]);
 
   // Load guidance groups when level changes
   useEffect(() => {
