@@ -92,8 +92,8 @@ export default function AttendancePage({ params }: { params: Promise<{ sessionId
       const payload = {
         sessionScheduleId: Number(sessionId),
         roomId: session.roomId,
-        sessionGroupId: sessionGroup.groupId, // Using sessionGroup.groupId from state
-        date: new Date().toISOString().split('T')[0], // Current date YYYY-MM-DD
+        sessionGroupId: sessionGroup.groupId,
+        date: new Date().toISOString().split('T')[0],
         startTime: session.startTime,
         endTime: session.endTime,
         attendances: attendance.map(a => ({

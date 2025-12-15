@@ -34,7 +34,7 @@ export default function LoginForm() {
           router.push("/attendance");
           break;
         case "Student":
-          router.push("/student/records");
+          router.push("/student/dashboard");
           break;
         default:
           router.push("/");

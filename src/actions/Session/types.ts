@@ -1,7 +1,7 @@
 export enum EnAttendanceStatus {
   Present = 1,
-  Late = 2,
-  Absent = 3
+  Late = 3,
+  Absent = 2
 }
 
 export interface AttendanceItemDTO {

@@ -18,6 +18,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeContext } from "@/context/ThemeContext";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { decodeJwt } from "@/lib/auth";
+import { UserRole } from "@/types/auth";
 
 interface Tab {
   href: string;
@@ -37,9 +39,18 @@ export default function SharedDashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      const claims = decodeJwt(token);
+      if (claims) {
+        setUserRole(claims.role);
+      }
+    }
+
     const handleResize = () => setIsMobile(window.innerWidth < 980);
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -47,21 +58,28 @@ export default function SharedDashboardLayout({
   }, []);
 
   const tabs: Tab[] = [
-    { href: "/overview", label: "نظرة عامة", icon: LayoutDashboard },
-    {
-      href: "/users",
-      label: "إدارة المستخدمين",
-      icon: Users,
-      children: [
-        { href: "/users/students", label: "الطلاب", icon: Users },
-        { href: "/users/instructors", label: "المحاضرون", icon: Users },
-        { href: "/users/employees", label: "الموظفون", icon: Users },
-        { href: "/users/managers", label: "أعضاء الإدارة", icon: Users },
-      ],
-    },
-    // { href: "/reports", label: "التقارير", icon: BarChart3 },
-    { href: "/schedule", label: "الجدول الدراسي", icon: Calendar },
-    { href: "/settings", label: "الإعدادات", icon: Settings },
+    ...(userRole === "Student"
+      ? [
+          { href: "/student/dashboard", label: "لوحة الطالب", icon: LayoutDashboard },
+          { href: "/student/schedule", label: "الجدول الدراسي", icon: Calendar },
+          { href: "/student/notifications", label: "الإشعارات", icon: Calendar }, // Using Calendar icon as placeholder, ideally Bell
+        ]
+      : [
+          { href: "/overview", label: "نظرة عامة", icon: LayoutDashboard },
+          {
+            href: "/users",
+            label: "إدارة المستخدمين",
+            icon: Users,
+            children: [
+              { href: "/users/students", label: "الطلاب", icon: Users },
+              { href: "/users/instructors", label: "المحاضرون", icon: Users },
+              { href: "/users/employees", label: "الموظفون", icon: Users },
+              { href: "/users/managers", label: "أعضاء الإدارة", icon: Users },
+            ],
+          },
+          { href: "/schedule", label: "الجدول الدراسي", icon: Calendar },
+          { href: "/settings", label: "الإعدادات", icon: Settings },
+        ]),
   ];
 
   const isActive = (href: string) =>

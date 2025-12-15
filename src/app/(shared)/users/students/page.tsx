@@ -314,6 +314,15 @@ export default function StudentsPage() {
                         </div>
                       </div>
                     )}
+
+                    <button
+                      onClick={() =>
+                        window.location.href = `/users/students/${student.studentID}/attendance?level=${student.studentLevel}`
+                      }
+                      className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 mr-3"
+                    >
+                      الغياب
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -13,6 +13,7 @@ export type UserRole =
   | 'Instructor';
 
 export interface UserClaims {
+  id: string;
   name: string; 
   role: UserRole; 
 }

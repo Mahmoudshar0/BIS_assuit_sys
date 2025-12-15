@@ -10,7 +10,7 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bis.runasp.net/api';
 
-function decodeJwt(token: string): UserClaims | null {
+export function decodeJwt(token: string): UserClaims | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) {
@@ -29,6 +29,7 @@ function decodeJwt(token: string): UserClaims | null {
     const claims = JSON.parse(jsonPayload);
     
     return {
+      id: claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || claims["sub"] || "",
       name: claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
       role: claims["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
     } as UserClaims;
