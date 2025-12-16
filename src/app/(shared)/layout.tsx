@@ -256,7 +256,7 @@ export default function SharedDashboardLayout({
       </motion.aside>
 
       <main
-        className={`flex-1 p-8 rounded-3xl shadow-inner m-2 transition-all duration-300 ${
+        className={`overflow-x-auto flex-1 p-4 md:p-8 rounded-3xl shadow-inner m-2 transition-all duration-300 ${
           isMobile ? "mr-0" : "mr-72"
         } ${
           theme === "dark"
